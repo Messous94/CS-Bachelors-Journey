@@ -25,5 +25,5 @@ while low <= high:
     else:
         high = mid -1
 
-print(f"عدد خطوات البحث الخطي: {linear_steps} خطوة")
-print(f"عدد خطوات البحث الثنائي: {binary_steps} خطوة فقط!")
+print(f"Linear Search steps: {linear_steps}")
+print(f"Binary Search steps: {binary_steps}")
