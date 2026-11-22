@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <script>
     tailwind.config = {
@@ -15,17 +15,16 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Cairo', 'Inter', 'sans-serif'],
+            sans: ['IBM Plex Sans Arabic', 'sans-serif'],
             mono: ['JetBrains Mono', 'monospace'],
           },
           colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-              900: '#312e81',
+            tealcalm: {
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
             }
           }
         }
@@ -34,7 +33,23 @@
   </script>
 
   <style>
-    /* Custom scrollbar for clean reading and navigation */
+    :root {
+      --reader-size: 18px;
+      --reader-lh: 1.9;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+      background-color: #F8F9FA;
+      color: #1F2937;
+    }
+
+    html.dark body {
+      background-color: #0F172A;
+      color: #E2E8F0;
+    }
+
+    /* Calm scrollbars */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -47,14 +62,14 @@
       border-radius: 9999px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: rgba(100, 116, 139, 0.6);
+      background: rgba(13, 148, 136, 0.6);
     }
 
-    /* Strictly enforce LTR on code blocks, terminals, and technical identifiers */
+    /* Strictly enforce LTR on code blocks, terminals, and technical tokens */
     .ltr-block {
       direction: ltr;
       text-align: left;
-      font-family: 'JetBrains Mono', 'Inter', monospace;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     pre.code-box {
@@ -63,6 +78,16 @@
       font-family: 'JetBrains Mono', monospace;
       tab-size: 2;
       overflow-x: auto;
+    }
+
+    .reader-column {
+      max-width: 780px;
+      margin-inline: auto;
+    }
+
+    .reader-prose {
+      font-size: var(--reader-size);
+      line-height: var(--reader-lh);
     }
 
     @keyframes pulseSoft {
@@ -74,23 +99,33 @@
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
+<body class="bg-[#F8F9FA] text-[#1F2937] dark:bg-[#0F172A] dark:text-[#E2E8F0] antialiased selection:bg-[#0D9488] selection:text-white">
 
-  <!-- Top Toast / Status Banner (replaces alert/confirm) -->
-  <div id="toastContainer" class="fixed bottom-5 left-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+  <!-- Toast Notifications -->
+  <div id="toastContainer" class="fixed bottom-20 left-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- Floating Selection Button: مش فاهم — اشرح باسترسال -->
+  <button
+    id="floatingDontUnderstandBtn"
+    type="button"
+    class="hidden fixed z-50 rounded-xl bg-[#0D9488] hover:bg-[#0F766E] text-white px-3.5 py-2 text-xs font-bold shadow-xl border border-white/20 transition flex items-center gap-1.5"
+  >
+    <span>❓</span>
+    <span>مش فاهم — اشرح باسترسال</span>
+  </button>
 
   <!-- Settings Modal -->
-  <div id="settingsModal" class="fixed inset-0 z-40 hidden items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4">
-    <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+  <div id="settingsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
+    <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
         <div class="flex items-center gap-2.5">
-          <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 font-bold">⚙</span>
+          <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#0D9488]/15 text-[#0D9488] font-bold">⚙</span>
           <div>
             <h2 class="text-base font-bold">إعدادات المنصة و Gemini API</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400">يتم حفظ المفتاح والتقدم والبيانات محلياً على متصفحك</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">يتم حفظ المفتاح والتقدم والقاموس والبيانات محلياً في localStorage</p>
           </div>
         </div>
-        <button id="closeSettingsBtn" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">✕</button>
+        <button id="closeSettingsBtn" type="button" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">✕</button>
       </div>
 
       <div class="p-6 space-y-5">
@@ -102,24 +137,24 @@
               type="password"
               dir="ltr"
               placeholder="AIzaSy..."
-              class="ltr-block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              class="ltr-block w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-[#F8F9FA] dark:bg-[#0F172A] px-3.5 py-2.5 text-sm focus:border-[#0D9488] focus:outline-none focus:ring-2 focus:ring-[#0D9488]/20"
             />
-            <button id="toggleApiKeyVisBtn" type="button" class="rounded-xl border border-slate-300 dark:border-slate-700 px-3 py-2.5 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition shrink-0">
+            <button id="toggleApiKeyVisBtn" type="button" class="rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition shrink-0">
               إظهار
             </button>
           </div>
           <p class="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-            يُستخدم لتوليد الدروس تلقائياً بأسلوب <span class="ltr-block font-semibold text-indigo-600 dark:text-indigo-400">gemini-3-flash-preview</span> وتبسيط الأمثلة أو إنشاء اختبارات إضافية.
+            يُستخدم <span class="ltr-block font-semibold text-[#0D9488]">gemini-3-flash-preview</span> بحد أقصى <span class="ltr-block font-semibold">maxOutputTokens: 65536</span> للشرح المسترسل الكامل دون اختصار.
           </p>
         </div>
 
-        <div class="rounded-xl bg-slate-100 dark:bg-slate-800/70 p-4 space-y-2.5">
+        <div class="rounded-xl bg-[#F8F9FA] dark:bg-[#0F172A]/80 border border-slate-200 dark:border-slate-700 p-4 space-y-2.5">
           <div class="flex items-center justify-between text-xs font-semibold">
             <span>إدارة بيانات التخزين المحلي (localStorage)</span>
-            <span id="storageStatsLabel" class="ltr-block text-indigo-600 dark:text-indigo-400">0 Cached Lessons</span>
+            <span id="storageStatsLabel" class="ltr-block text-[#0D9488]">0 Cached Lessons</span>
           </div>
           <div class="flex flex-wrap gap-2 pt-1">
-            <button id="exportDataBtn" type="button" class="rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+            <button id="exportDataBtn" type="button" class="rounded-lg bg-white dark:bg-[#1E293B] border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
               تصدير نسخة JSON
             </button>
             <button id="clearCacheBtn" type="button" class="rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 px-3 py-1.5 text-xs font-semibold hover:bg-amber-500/20 transition">
@@ -130,7 +165,7 @@
             </button>
           </div>
           <div id="confirmResetBar" class="hidden pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2">
-            <span class="text-xs text-rose-600 dark:text-rose-400 font-semibold">هل أنت متأكد من تصفير كل التقدم والدروس المحفوظة؟</span>
+            <span class="text-xs text-rose-600 dark:text-rose-400 font-semibold">تأكيد تصفير كل التقدم والدروس والقاموس المحفوظ؟</span>
             <div class="flex gap-2">
               <button id="confirmResetYes" type="button" class="rounded-lg bg-rose-600 text-white px-3 py-1 text-xs font-bold hover:bg-rose-700">تأكيد</button>
               <button id="confirmResetNo" type="button" class="rounded-lg bg-slate-200 dark:bg-slate-700 px-3 py-1 text-xs font-semibold">إلغاء</button>
@@ -139,286 +174,417 @@
         </div>
       </div>
 
-      <div class="flex items-center justify-end gap-2 px-6 py-4 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-800">
+      <div class="flex items-center justify-end gap-2 px-6 py-4 border-t border-slate-200 dark:border-slate-700">
         <button id="cancelSettingsBtn" type="button" class="rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800 transition">إلغاء</button>
-        <button id="saveSettingsBtn" type="button" class="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 text-sm font-bold shadow-lg shadow-indigo-600/25 transition">حفظ الإعدادات</button>
+        <button id="saveSettingsBtn" type="button" class="rounded-xl bg-[#0D9488] hover:bg-[#0F766E] text-white px-5 py-2 text-sm font-bold shadow-sm transition">حفظ الإعدادات</button>
       </div>
     </div>
   </div>
 
   <!-- Main Shell -->
   <div class="min-h-screen flex flex-col">
-    <!-- Top Header -->
-    <header class="sticky top-0 z-30 h-16 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 lg:px-6 flex items-center justify-between gap-3">
-      <div class="flex items-center gap-3 min-w-0">
-        <button id="mobileSidebarBtn" type="button" class="lg:hidden rounded-xl p-2.5 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition" aria-label="فتح القائمة">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <!-- Clean Single-Line Header -->
+    <header class="sticky top-0 z-30 h-14 bg-white/95 dark:bg-[#1E293B]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-700/80 px-3 sm:px-5 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2 min-w-0">
+        <!-- Mobile Sidebar Toggle -->
+        <button id="mobileSidebarBtn" type="button" class="lg:hidden rounded-lg p-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition shrink-0" aria-label="فتح القائمة">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
 
-        <div class="flex items-center gap-2.5 min-w-0">
-          <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white flex items-center justify-center font-extrabold text-sm shadow-md shadow-indigo-600/20 shrink-0">
-            ZG
-          </div>
-          <div class="truncate">
-            <div class="flex items-center gap-2">
-              <span class="font-extrabold text-sm sm:text-base tracking-tight truncate">Zero-Gap CS Platform</span>
-              <span class="hidden sm:inline-flex items-center rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2.5 py-0.5 text-[11px] font-bold ltr-block">26 Courses • 208 Lessons</span>
-            </div>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">منصة توليد الدروس الذكية وفق منهج بكالوريوس علوم الحاسب بدون فجوات</p>
-          </div>
+        <!-- Desktop Focus Mode / Sidebar Collapse Toggle -->
+        <button id="focusModeBtn" type="button" class="hidden lg:inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold transition shrink-0" title="طي أو إظهار القائمة الجانبية (Focus Mode)">
+          <span id="focusModeIcon">◫</span>
+          <span id="focusModeLabel">وضع التركيز</span>
+        </button>
+
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="h-7 w-7 rounded-lg bg-[#0D9488] text-white flex items-center justify-center font-bold text-xs shrink-0">ZG</span>
+          <span class="font-bold text-sm sm:text-base whitespace-nowrap">Zero-Gap CS</span>
         </div>
       </div>
 
-      <!-- Overall Progress Pill & Actions -->
-      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-        <div class="hidden md:flex items-center gap-3 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/70 rounded-xl px-3.5 py-1.5">
-          <div class="text-right">
-            <div class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">التقدم الكلي</div>
-            <div id="headerProgressText" class="text-xs font-extrabold ltr-block text-indigo-600 dark:text-indigo-400">0 / 208 (0.0%)</div>
-          </div>
-          <div class="w-24 h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-            <div id="headerProgressBar" class="h-full bg-gradient-to-r from-indigo-600 to-emerald-500 transition-all duration-300" style="width: 0%"></div>
-          </div>
-        </div>
+      <!-- Single-Line View Mode Switcher -->
+      <div class="flex items-center gap-1 bg-[#F8F9FA] dark:bg-[#0F172A] p-1 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0">
+        <button id="viewLessonTabBtn" type="button" class="view-mode-btn rounded-lg px-2.5 sm:px-3 py-1 text-xs font-bold bg-[#0D9488] text-white transition whitespace-nowrap">
+          الدرس
+        </button>
+        <button id="viewGlossaryTabBtn" type="button" class="view-mode-btn rounded-lg px-2.5 sm:px-3 py-1 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition whitespace-nowrap">
+          قاموسي <span id="glossaryCountBadge" class="ltr-block text-[10px]">(0)</span>
+        </button>
+        <button id="viewFlashcardsTabBtn" type="button" class="view-mode-btn rounded-lg px-2.5 sm:px-3 py-1 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition whitespace-nowrap">
+          Flashcards
+        </button>
+      </div>
 
-        <button id="themeToggleBtn" type="button" class="rounded-xl p-2.5 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-sm" title="تبديل الوضع الليلي/النهاري">
+      <!-- Single-Line Right Controls -->
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <span id="headerProgressCompact" class="hidden xl:inline-block ltr-block text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 px-2.5 py-1 rounded-lg whitespace-nowrap">0/208</span>
+
+        <button id="themeToggleBtn" type="button" class="rounded-lg p-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-xs shrink-0" title="تبديل الوضع الليلي/النهاري">
           <span id="themeIcon">🌙</span>
         </button>
 
-        <button id="openSettingsBtn" type="button" class="flex items-center gap-2 rounded-xl bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-700 text-white px-3.5 py-2 text-xs sm:text-sm font-bold shadow-sm transition">
+        <button id="openSettingsBtn" type="button" class="flex items-center gap-1.5 rounded-lg bg-[#0D9488] hover:bg-[#0F766E] text-white px-2.5 sm:px-3 py-1.5 text-xs font-bold transition whitespace-nowrap shrink-0">
           <span>⚙</span>
-          <span>الإعدادات و API</span>
-          <span id="apiStatusDot" class="h-2 w-2 rounded-full bg-amber-400" title="حالة مفتاح API"></span>
+          <span class="hidden sm:inline">API</span>
+          <span id="apiStatusDot" class="h-2 w-2 rounded-full bg-amber-300"></span>
         </button>
       </div>
     </header>
 
-    <!-- Body Grid: Sidebar + Main Content -->
-    <div class="flex-1 flex relative">
-      <!-- Mobile Overlay -->
+    <!-- Body Layout: Sidebar + Central Reading Column -->
+    <div class="flex-1 flex relative pb-20">
+      <!-- Mobile Sidebar Backdrop -->
       <div id="sidebarBackdrop" class="fixed inset-0 z-30 bg-slate-950/60 backdrop-blur-xs hidden lg:hidden"></div>
 
-      <!-- Curriculum Sidebar -->
-      <aside id="curriculumSidebar" class="fixed lg:sticky top-16 right-0 z-40 lg:z-10 h-[calc(100vh-4rem)] w-80 sm:w-96 shrink-0 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col transform translate-x-full lg:translate-x-0 transition-transform duration-200 ease-out">
-        <!-- Sidebar Top Summary & Search -->
-        <div class="p-4 border-b border-slate-200 dark:border-slate-800 space-y-3">
+      <!-- Curriculum Sidebar (6 Stages / 26 Courses / 208 Lessons) -->
+      <aside id="curriculumSidebar" class="fixed lg:sticky top-14 right-0 z-40 lg:z-10 h-[calc(100vh-3.5rem)] w-80 sm:w-96 shrink-0 bg-white dark:bg-[#1E293B] border-l border-slate-200 dark:border-slate-700/80 flex flex-col transform translate-x-full lg:translate-x-0 transition-all duration-200 ease-out">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-700/80 space-y-3">
           <div class="flex items-center justify-between">
-            <h2 class="font-extrabold text-sm">خريطة المنهج الكاملة</h2>
-            <span id="sidebarCompletedBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 ltr-block">0 / 208</span>
+            <h2 class="font-bold text-sm">خريطة المنهج (208 درس)</h2>
+            <span id="sidebarCompletedBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#0D9488]/15 text-[#0D9488] ltr-block">0 / 208</span>
           </div>
 
-          <div class="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-            <div id="sidebarProgressBar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 0%"></div>
+          <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-[#0F172A] overflow-hidden">
+            <div id="sidebarProgressBar" class="h-full bg-[#0D9488] transition-all duration-300" style="width: 0%"></div>
           </div>
 
           <div class="relative">
             <input
               id="lessonSearchInput"
               type="text"
-              placeholder="ابحث برمز الدرس أو العنوان (مثال: HW101-05 أو RAM)..."
-              class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3.5 py-2 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              placeholder="ابحث برمز الدرس أو العنوان (مثال: HW101-05)..."
+              class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-[#F8F9FA] dark:bg-[#0F172A] px-3.5 py-2 text-xs focus:border-[#0D9488] focus:outline-none focus:ring-2 focus:ring-[#0D9488]/20"
             />
             <button id="clearSearchBtn" type="button" class="hidden absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600">✕</button>
           </div>
         </div>
 
-        <!-- Scrollable Stages -> Courses -> 208 Lessons -->
         <div id="curriculumTreeContainer" class="flex-1 overflow-y-auto p-3 space-y-3"></div>
       </aside>
 
-      <!-- Main Lesson Workspace -->
-      <main class="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full space-y-6">
-        <!-- API Warning Banner if missing -->
-        <div id="missingApiBanner" class="hidden rounded-2xl border border-amber-300/70 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/30 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="flex items-start gap-3">
-            <span class="text-xl mt-0.5">🔑</span>
-            <div>
-              <h3 class="text-sm font-bold text-amber-900 dark:text-amber-200">مفتاح Gemini API غير مُدخل بعد</h3>
-              <p class="text-xs text-amber-800/80 dark:text-amber-300/80 mt-0.5">
-                أدخل مفتاح API الخاص بك من الإعدادات لتوليد الدروس الـ 208 تلقائياً وتنفيذ التعمق والاختبارات الإضافية داخل المنصة.
-              </p>
+      <!-- Main Central Content Column -->
+      <main id="mainContentArea" class="flex-1 min-w-0 px-4 sm:px-6 pt-6">
+        <div class="reader-column space-y-6">
+          <!-- Missing API Warning -->
+          <div id="missingApiBanner" class="hidden rounded-2xl border border-amber-400/50 bg-amber-50 dark:bg-amber-950/30 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-start gap-3">
+              <span class="text-lg mt-0.5">🔑</span>
+              <div>
+                <h3 class="text-sm font-bold text-amber-900 dark:text-amber-200">مفتاح Gemini API غير مُدخل بعد</h3>
+                <p class="text-xs text-amber-800/80 dark:text-amber-300/80 mt-0.5">
+                  أدخل المفتاح من الإعدادات لتوليد الدروس المسترسلة، الشرح المعمق لـ «مش فاهم»، المحاكيات التفاعلية، ومراجعة اللاب.
+                </p>
+              </div>
+            </div>
+            <button id="bannerOpenSettingsBtn" type="button" class="rounded-xl bg-[#0D9488] hover:bg-[#0F766E] text-white px-4 py-2 text-xs font-bold shrink-0 transition">
+              إدخال المفتاح
+            </button>
+          </div>
+
+          <!-- ==================== VIEW 1: LESSON WORKSPACE ==================== -->
+          <div id="lessonViewContainer" class="space-y-6">
+            <article class="rounded-2xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700/80 shadow-xs overflow-hidden">
+              <!-- Lesson Header -->
+              <div class="p-5 sm:p-7 border-b border-slate-200 dark:border-slate-700/80 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span id="lessonIdBadge" class="ltr-block rounded-lg bg-[#0D9488] text-white px-2.5 py-1 text-xs font-bold">HW101-01</span>
+                    <span id="stageBadge" class="rounded-lg bg-[#F8F9FA] dark:bg-[#0F172A] border border-slate-200 dark:border-slate-700 px-2.5 py-1 text-xs font-semibold">المرحلة ١</span>
+                    <span id="courseBadge" class="rounded-lg bg-[#0D9488]/10 text-[#0D9488] px-2.5 py-1 text-xs font-semibold">HW101</span>
+                    <span id="cachedBadge" class="hidden rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 px-2.5 py-1 text-xs font-bold">⚡ محفوظ محلياً</span>
+                  </div>
+
+                  <!-- Font size quick adjustment -->
+                  <div class="flex items-center gap-1 text-xs">
+                    <button id="fontDecreaseBtn" type="button" class="rounded-lg border border-slate-200 dark:border-slate-700 px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold" title="تصغير الخط">A-</button>
+                    <button id="fontIncreaseBtn" type="button" class="rounded-lg border border-slate-200 dark:border-slate-700 px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold" title="تكبير الخط">A+</button>
+                  </div>
+                </div>
+
+                <h1 id="lessonTitleHeading" class="text-xl sm:text-2xl lg:text-[28px] font-bold leading-snug">
+                  جاري تحميل الدرس...
+                </h1>
+                <p id="lessonFocusSubtitle" class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed"></p>
+
+                <div class="flex flex-wrap items-center gap-2 text-xs pt-1">
+                  <span class="font-bold text-slate-500 dark:text-slate-400">المتطلبات السابقة:</span>
+                  <div id="prereqsList" class="flex flex-wrap gap-1.5"></div>
+                </div>
+
+                <!-- Action Buttons inside Lesson -->
+                <div class="pt-3 border-t border-slate-200/80 dark:border-slate-700/80 flex flex-wrap items-center gap-2">
+                  <button id="generateLessonBtn" type="button" class="rounded-xl bg-[#0D9488] hover:bg-[#0F766E] text-white px-4 py-2 text-xs font-bold transition flex items-center gap-1.5">
+                    <span>✨</span>
+                    <span id="generateLessonBtnText">توليد الدرس المسترسل</span>
+                  </button>
+
+                  <button id="simplerExampleBtn" type="button" class="rounded-xl bg-[#0D9488]/10 hover:bg-[#0D9488]/20 text-[#0D9488] border border-[#0D9488]/30 px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5">
+                    <span>💡</span>
+                    <span>اشرحلي بمثال أبسط</span>
+                  </button>
+
+                  <button id="extraQuizBtn" type="button" class="rounded-xl bg-slate-100 dark:bg-[#0F172A] hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5">
+                    <span>📝</span>
+                    <span>اعملي اختبار إضافي</span>
+                  </button>
+
+                  <button id="interactiveWidgetBtn" type="button" class="rounded-xl bg-[#0D9488]/15 hover:bg-[#0D9488]/25 text-[#0F766E] dark:text-[#5EEAD4] border border-[#0D9488]/40 px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5">
+                    <span>🎛️</span>
+                    <span>محاكي تفاعلي للدرس</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Lesson Body -->
+              <div class="p-5 sm:p-7 space-y-8">
+                <!-- Loading State -->
+                <div id="loadingState" class="hidden py-12 text-center space-y-3">
+                  <div class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0D9488]/15 text-[#0D9488] text-2xl animate-pulse-soft">
+                    🧠
+                  </div>
+                  <h3 id="loadingTitle" class="text-base font-bold">جاري توليد الدرس المسترسل العميق...</h3>
+                  <p id="loadingSubtitle" class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                    يتم إعداد المصطلحات، الهدف، الشرح المسترسل المفصل خطوة بخطوة، الأمثلة الكاملة، والكويز التفاعلي.
+                  </p>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyLessonState" class="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center space-y-3">
+                  <div class="text-3xl">📘</div>
+                  <h3 class="text-base font-bold">هذا الدرس لم يُولَّد بعد على جهازك</h3>
+                  <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
+                    اضغط على <span class="font-bold text-[#0D9488]">«توليد الدرس المسترسل»</span> لتوليد شرح مفصل كامل وحفظه تلقائياً في <span class="ltr-block">localStorage</span>.
+                  </p>
+                </div>
+
+                <!-- Rendered Structured Lesson -->
+                <div id="renderedLessonContent" class="reader-prose hidden space-y-8">
+                  <!-- 1. Key Terms -->
+                  <section class="space-y-3">
+                    <div class="flex items-center gap-2">
+                      <span class="h-7 w-7 rounded-lg bg-[#0D9488]/15 text-[#0D9488] flex items-center justify-center font-bold text-xs">1</span>
+                      <h2 class="text-base sm:text-lg font-bold">المصطلحات الأساسية (تُحفظ تلقائياً في قاموسي)</h2>
+                    </div>
+                    <div id="keyTermsGrid" class="grid grid-cols-1 gap-3"></div>
+                  </section>
+
+                  <!-- 2. Objectives & Why It Matters -->
+                  <section class="space-y-3">
+                    <div class="flex items-center gap-2">
+                      <span class="h-7 w-7 rounded-lg bg-[#0D9488]/15 text-[#0D9488] flex items-center justify-center font-bold text-xs">2</span>
+                      <h2 class="text-base sm:text-lg font-bold">الهدف من الدرس وأهميته الهندسية</h2>
+                    </div>
+                    <div id="objectivesBox" class="rounded-2xl bg-[#F8F9FA] dark:bg-[#0F172A]/70 border border-slate-200 dark:border-slate-700/80 p-4 sm:p-5 space-y-3 leading-relaxed"></div>
+                  </section>
+
+                  <!-- 3. Deep Exhaustive Explanation -->
+                  <section class="space-y-3">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                      <div class="flex items-center gap-2">
+                        <span class="h-7 w-7 rounded-lg bg-[#0D9488]/15 text-[#0D9488] flex items-center justify-center font-bold text-xs">3</span>
+                        <h2 class="text-base sm:text-lg font-bold">الشرح المسترسل العميق خطوة بخطوة</h2>
+                      </div>
+                      <span class="text-xs text-[#0D9488] font-semibold">ظلّل أي جملة لظهور زر «❓ مش فاهم»</span>
+                    </div>
+                    <div id="deepExplanationBox" class="rounded-2xl bg-[#F8F9FA] dark:bg-[#0F172A]/60 border border-slate-200 dark:border-slate-700/80 p-5 sm:p-6 space-y-5"></div>
+                  </section>
+
+                  <!-- 4. Code & Hardware/Memory Examples (LTR) -->
+                  <section class="space-y-3">
+                    <div class="flex items-center justify-between gap-2">
+                      <div class="flex items-center gap-2">
+                        <span class="h-7 w-7 rounded-lg bg-[#0D9488]/15 text-[#0D9488] flex items-center justify-center font-bold text-xs">4</span>
+                        <h2 class="text-base sm:text-lg font-bold">الأمثلة المحلولة بالكامل وتتبع الذاكرة والهاردوير</h2>
+                      </div>
+                      <span class="ltr-block text-[11px] font-semibold text-slate-400">LTR</span>
+                    </div>
+                    <div id="examplesContainer" class="space-y-4"></div>
+                  </section>
+
+                  <!-- 5. Interactive Quiz -->
+                  <section id="mainQuizSection" class="space-y-4 pt-2">
+                    <div class="flex items-center justify-between gap-2">
+                      <div class="flex items-center gap-2">
+                        <span class="h-7 w-7 rounded-lg bg-[#0D9488]/15 text-[#0D9488] flex items-center justify-center font-bold text-xs">5</span>
+                        <h2 class="text-base sm:text-lg font-bold">الكويز التفاعلي للتحقق من الفهم</h2>
+                      </div>
+                      <span id="mainQuizScoreBadge" class="hidden rounded-full bg-[#0D9488]/15 text-[#0D9488] px-3 py-1 text-xs font-bold ltr-block"></span>
+                    </div>
+                    <div id="mainQuizContainer" class="space-y-4"></div>
+                  </section>
+
+                  <!-- 6. Saved "مش فاهم" Deep Expansions Attached to This Lesson -->
+                  <section id="savedExplanationsSection" class="hidden space-y-4 pt-2">
+                    <div class="flex items-center gap-2">
+                      <span class="h-7 w-7 rounded-lg bg-[#0D9488]/15 text-[#0D9488] flex items-center justify-center font-bold text-xs">❓</span>
+                      <h2 class="text-base sm:text-lg font-bold">شروحات «مش فاهم» المسترسلة المحفوظة في الدرس</h2>
+                    </div>
+                    <div id="savedExplanationsList" class="space-y-4"></div>
+                  </section>
+                </div>
+
+                <!-- Interactive Widget Box (Generated HTML/JS Simulation inside Lesson) -->
+                <div id="interactiveWidgetPanel" class="hidden rounded-2xl border-2 border-[#0D9488]/40 bg-[#F8F9FA] dark:bg-[#0F172A] p-5 space-y-4">
+                  <div class="flex items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-700 pb-3">
+                    <div class="flex items-center gap-2">
+                      <span>🎛️</span>
+                      <h3 id="widgetPanelTitle" class="text-base font-bold text-[#0D9488]">المحاكي التفاعلي للدرس</h3>
+                    </div>
+                    <button id="closeWidgetBtn" type="button" class="rounded-lg px-2.5 py-1 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-800 transition">إغلاق ✕</button>
+                  </div>
+                  <div id="widgetLoading" class="hidden py-6 text-center text-xs font-semibold text-[#0D9488] animate-pulse-soft">
+                    جاري توليد محاكي تفاعلي صغير (<span class="ltr-block">HTML/JS</span>) لمحاكاة مفهوم الدرس عملياً...
+                  </div>
+                  <div id="widgetMountArea" class="space-y-3"></div>
+                </div>
+
+                <!-- Dynamic Addon Panel (Simpler Example / Extra Quiz / Highlighted "مش فاهم") -->
+                <div id="dynamicAddonPanel" class="hidden rounded-2xl border border-[#0D9488]/40 bg-[#0D9488]/5 p-5 sm:p-6 space-y-4">
+                  <div class="flex items-center justify-between gap-2 border-b border-[#0D9488]/20 pb-3">
+                    <div class="flex items-center gap-2">
+                      <span id="addonIcon" class="text-xl">💡</span>
+                      <h3 id="addonTitle" class="text-base font-bold text-[#0F766E] dark:text-[#5EEAD4]">إضافة تفاعلية</h3>
+                    </div>
+                    <button id="closeAddonBtn" type="button" class="rounded-lg px-2.5 py-1 text-xs font-bold hover:bg-white/60 dark:hover:bg-slate-800 transition">إغلاق ✕</button>
+                  </div>
+                  <div id="addonLoading" class="hidden py-6 text-center text-xs sm:text-sm font-semibold text-[#0D9488] animate-pulse-soft">
+                    جاري توليد الشرح المسترسل داخل نفس الصفحة...
+                  </div>
+                  <div id="addonBody" class="space-y-4 text-sm leading-8"></div>
+                </div>
+
+                <!-- Fixed "مش فاهم" Box at End of Lesson -->
+                <div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-[#F8F9FA] dark:bg-[#0F172A]/70 p-5 space-y-3">
+                  <div class="flex items-center justify-between gap-2">
+                    <h3 class="text-sm sm:text-base font-bold flex items-center gap-2">
+                      <span>❓</span>
+                      <span>صندوق «مش فاهم» — اكتب أي جزئية غير واضحة لتفكيكها باسترسال</span>
+                    </h3>
+                  </div>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                    اكتب النقطة أو السطر أو الفكرة اللي محتاجة تفكيك أكتر؛ هيتم توليد شرح طويل ومفصل بتشبيهات من الواقع وأمثلة خطوة بخطوة وإلحاقه بالدرس وحفظه في <span class="ltr-block">localStorage</span>.
+                  </p>
+                  <textarea
+                    id="customConfusionInput"
+                    rows="3"
+                    placeholder="مثال: مش فاهم إزاي Sense Amplifier بيعيد شحن خلية DRAM بعد ما القراءة بتفرغها..."
+                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#1E293B] p-3 text-sm focus:border-[#0D9488] focus:outline-none focus:ring-2 focus:ring-[#0D9488]/20"
+                  ></textarea>
+                  <div class="flex justify-end">
+                    <button id="submitConfusionBtn" type="button" class="rounded-xl bg-[#0D9488] hover:bg-[#0F766E] text-white px-4 py-2 text-xs font-bold transition flex items-center gap-1.5">
+                      <span>🔍</span>
+                      <span>اشرح باسترسال وأضف للدرس</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Lab Reviewer Box (Codespaces Solution Evaluator) -->
+                <div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-[#F8F9FA] dark:bg-[#0F172A]/70 p-5 space-y-3">
+                  <div class="flex items-center justify-between gap-2 flex-wrap">
+                    <h3 class="text-sm sm:text-base font-bold flex items-center gap-2">
+                      <span>🧪</span>
+                      <span>مراجع اللاب العملي (Lab Reviewer — Codespaces)</span>
+                    </h3>
+                    <span class="ltr-block text-[11px] text-slate-500">Code Review & Persistence</span>
+                  </div>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                    الصق كود الحل الخاص بك من <span class="ltr-block">GitHub Codespaces</span> ليقوم <span class="ltr-block">Gemini</span> بتقييمه وتصحيحه وحفظ التقييم مع الدرس.
+                  </p>
+                  <textarea
+                    id="labCodeInput"
+                    rows="6"
+                    dir="ltr"
+                    placeholder="# Paste your Codespaces lab solution code here..."
+                    class="ltr-block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-950 text-emerald-300 p-3.5 text-xs sm:text-[13px] focus:border-[#0D9488] focus:outline-none"
+                  ></textarea>
+                  <div class="flex justify-end">
+                    <button id="reviewLabBtn" type="button" class="rounded-xl bg-[#0D9488] hover:bg-[#0F766E] text-white px-4 py-2 text-xs font-bold transition flex items-center gap-1.5">
+                      <span>✅</span>
+                      <span>تقييم وتصحيح كود اللاب</span>
+                    </button>
+                  </div>
+
+                  <div id="labReviewResultBox" class="hidden rounded-xl border border-[#0D9488]/30 bg-white dark:bg-[#1E293B] p-4 space-y-3 text-sm leading-7"></div>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <!-- ==================== VIEW 2: ZERO-GAP GLOSSARY (قاموسي) ==================== -->
+          <div id="glossaryViewContainer" class="hidden space-y-4">
+            <div class="rounded-2xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700/80 p-5 sm:p-6 space-y-4">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 class="text-lg font-bold">قاموسي — Zero-Gap Glossary</h2>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    أي مصطلح أساسي يتولد في أي درس يُحفظ تلقائياً هنا مع رابط مباشر للرجوع إلى درسه.
+                  </p>
+                </div>
+                <input
+                  id="glossarySearchInput"
+                  type="text"
+                  placeholder="ابحث في المصطلحات..."
+                  class="w-full sm:w-64 rounded-xl border border-slate-300 dark:border-slate-700 bg-[#F8F9FA] dark:bg-[#0F172A] px-3.5 py-2 text-xs focus:border-[#0D9488] focus:outline-none"
+                />
+              </div>
+
+              <div id="glossaryListContainer" class="grid grid-cols-1 gap-3"></div>
             </div>
           </div>
-          <button id="bannerOpenSettingsBtn" type="button" class="rounded-xl bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 text-xs font-bold shrink-0 transition">
-            إدخال المفتاح الآن
-          </button>
+
+          <!-- ==================== VIEW 3: FLASHCARDS (المراجعة السريعة) ==================== -->
+          <div id="flashcardsViewContainer" class="hidden space-y-4">
+            <div class="rounded-2xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700/80 p-5 sm:p-6 space-y-5">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <div>
+                  <h2 class="text-lg font-bold">وضع المراجعة السريعة (Flashcards)</h2>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    يختبرك عشوائياً في المصطلحات والأسئلة من الدروس المكتملة فقط.
+                  </p>
+                </div>
+                <button id="nextFlashcardBtn" type="button" class="rounded-xl bg-[#0D9488] hover:bg-[#0F766E] text-white px-4 py-2 text-xs font-bold transition">
+                  بطاقة عشوائية جديدة ↻
+                </button>
+              </div>
+
+              <div id="flashcardStage" class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-[#F8F9FA] dark:bg-[#0F172A] p-6 min-h-[220px] flex flex-col justify-between space-y-4"></div>
+            </div>
+          </div>
         </div>
-
-        <!-- Active Lesson Card -->
-        <section id="lessonWorkspace" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-          <!-- Lesson Header -->
-          <div class="p-5 sm:p-7 border-b border-slate-200 dark:border-slate-800 bg-gradient-to-bl from-indigo-50/60 via-transparent to-transparent dark:from-indigo-950/20">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <div class="flex flex-wrap items-center gap-2">
-                <span id="lessonIdBadge" class="ltr-block rounded-lg bg-indigo-600 text-white px-2.5 py-1 text-xs font-bold">HW101-01</span>
-                <span id="stageBadge" class="rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 text-xs font-semibold">المرحلة ١</span>
-                <span id="courseBadge" class="rounded-lg bg-violet-500/10 text-violet-700 dark:text-violet-300 px-2.5 py-1 text-xs font-semibold">HW101</span>
-                <span id="cachedBadge" class="hidden rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 text-xs font-bold">⚡ محفوظ محلياً</span>
-              </div>
-
-              <!-- Mark Lesson Completed Toggle -->
-              <label class="inline-flex items-center gap-2.5 cursor-pointer select-none rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/70 px-3.5 py-2 hover:border-emerald-500/60 transition">
-                <input id="lessonCompletedCheckbox" type="checkbox" class="h-4 w-4 rounded accent-emerald-600 cursor-pointer" />
-                <span id="lessonCompletedLabel" class="text-xs font-bold text-slate-700 dark:text-slate-200">تم إتمام الدرس</span>
-              </label>
-            </div>
-
-            <h1 id="lessonTitleHeading" class="text-xl sm:text-2xl lg:text-3xl font-extrabold leading-snug text-slate-900 dark:text-white">
-              جاري تحميل الدرس...
-            </h1>
-            <p id="lessonFocusSubtitle" class="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed"></p>
-
-            <!-- Prerequisites Bar -->
-            <div class="mt-4 pt-4 border-t border-slate-200/70 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
-              <div class="flex flex-wrap items-center gap-2 text-xs">
-                <span class="font-bold text-slate-500 dark:text-slate-400">المتطلبات السابقة:</span>
-                <div id="prereqsList" class="flex flex-wrap gap-1.5"></div>
-              </div>
-
-              <!-- Action Buttons inside Lesson -->
-              <div class="flex flex-wrap items-center gap-2">
-                <button id="generateLessonBtn" type="button" class="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-xs font-bold shadow-sm transition flex items-center gap-1.5">
-                  <span>✨</span>
-                  <span id="generateLessonBtnText">توليد الدرس الآن</span>
-                </button>
-
-                <button id="simplerExampleBtn" type="button" class="rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-500/30 px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5">
-                  <span>💡</span>
-                  <span>اشرحلي بمثال أبسط</span>
-                </button>
-
-                <button id="extraQuizBtn" type="button" class="rounded-xl bg-violet-500/10 hover:bg-violet-500/20 text-violet-700 dark:text-violet-300 border border-violet-500/30 px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5">
-                  <span>📝</span>
-                  <span>اعملي اختبار إضافي</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Lesson Content Area -->
-          <div class="p-5 sm:p-7 space-y-8">
-            <!-- Loading State -->
-            <div id="loadingState" class="hidden py-12 text-center space-y-3">
-              <div class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 text-2xl animate-pulse-soft">
-                🧠
-              </div>
-              <h3 id="loadingTitle" class="text-base font-extrabold">جاري توليد الدرس وفق قواعد Zero-Gap...</h3>
-              <p id="loadingSubtitle" class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-                يتم إعداد المصطلحات الأساسية، الهدف، الشرح العميق بالمصري، الأمثلة البرمجية، والكويز التفاعلي.
-              </p>
-            </div>
-
-            <!-- Empty / Prompt State (when not yet generated) -->
-            <div id="emptyLessonState" class="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center space-y-3">
-              <div class="text-3xl">📘</div>
-              <h3 class="text-base font-extrabold">هذا الدرس لم يُولَّد بعد على جهازك</h3>
-              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
-                اضغط على زر <span class="font-bold text-indigo-600 dark:text-indigo-400">«توليد الدرس الآن»</span> لإرسال طلب فوري إلى <span class="ltr-block">Gemini API</span> وبناء الدرس كاملاً مع حفظه تلقائياً في <span class="ltr-block">localStorage</span> ليفتح فوراً في المرات القادمة.
-              </p>
-            </div>
-
-            <!-- Rendered Structured Lesson -->
-            <div id="renderedLessonContent" class="hidden space-y-8">
-              <!-- 1. Key Terms -->
-              <section class="space-y-3">
-                <div class="flex items-center gap-2">
-                  <span class="h-7 w-7 rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-extrabold text-xs">1</span>
-                  <h2 class="text-base sm:text-lg font-extrabold">المصطلحات الأساسية (Key Terms)</h2>
-                </div>
-                <div id="keyTermsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-              </section>
-
-              <!-- 2. Objectives & Why It Matters -->
-              <section class="space-y-3">
-                <div class="flex items-center gap-2">
-                  <span class="h-7 w-7 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-extrabold text-xs">2</span>
-                  <h2 class="text-base sm:text-lg font-extrabold">الهدف من الدرس وأهميته الهندسية</h2>
-                </div>
-                <div id="objectivesBox" class="rounded-2xl bg-emerald-500/5 border border-emerald-500/20 p-4 sm:p-5 space-y-3 text-sm leading-relaxed"></div>
-              </section>
-
-              <!-- 3. Deep Explanation in Egyptian Arabic -->
-              <section class="space-y-3">
-                <div class="flex items-center gap-2">
-                  <span class="h-7 w-7 rounded-lg bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-extrabold text-xs">3</span>
-                  <h2 class="text-base sm:text-lg font-extrabold">الشرح العميق التفصيلي (بالمصري)</h2>
-                </div>
-                <div id="deepExplanationBox" class="rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 space-y-4 text-sm sm:text-[15px] leading-8"></div>
-              </section>
-
-              <!-- 4. Code & Hardware/Memory Examples (LTR) -->
-              <section class="space-y-3">
-                <div class="flex items-center justify-between gap-2">
-                  <div class="flex items-center gap-2">
-                    <span class="h-7 w-7 rounded-lg bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-extrabold text-xs">4</span>
-                    <h2 class="text-base sm:text-lg font-extrabold">الأمثلة العملية والتطبيقات (Code & Trace)</h2>
-                  </div>
-                  <span class="ltr-block text-[11px] font-semibold text-slate-400">LTR Code View</span>
-                </div>
-                <div id="examplesContainer" class="space-y-4"></div>
-              </section>
-
-              <!-- 5. Interactive Quiz -->
-              <section id="mainQuizSection" class="space-y-4 pt-2">
-                <div class="flex items-center justify-between gap-2">
-                  <div class="flex items-center gap-2">
-                    <span class="h-7 w-7 rounded-lg bg-violet-500/15 text-violet-600 dark:text-violet-400 flex items-center justify-center font-extrabold text-xs">5</span>
-                    <h2 class="text-base sm:text-lg font-extrabold">الكويز التفاعلي للتحقق من الفهم</h2>
-                  </div>
-                  <span id="mainQuizScoreBadge" class="hidden rounded-full bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 px-3 py-1 text-xs font-extrabold ltr-block"></span>
-                </div>
-                <div id="mainQuizContainer" class="space-y-4"></div>
-              </section>
-            </div>
-
-            <!-- Dynamic Deep-Dive / Simpler Example / Extra Quiz Panel -->
-            <div id="dynamicAddonPanel" class="hidden rounded-2xl border-2 border-indigo-500/30 bg-indigo-500/5 dark:bg-indigo-950/20 p-5 sm:p-6 space-y-4">
-              <div class="flex items-center justify-between gap-2 border-b border-indigo-500/20 pb-3">
-                <div class="flex items-center gap-2">
-                  <span id="addonIcon" class="text-xl">💡</span>
-                  <h3 id="addonTitle" class="text-base sm:text-lg font-extrabold text-indigo-950 dark:text-indigo-200">إضافة تفاعلية</h3>
-                </div>
-                <button id="closeAddonBtn" type="button" class="rounded-lg px-2.5 py-1 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800 transition">
-                  إغلاق ✕
-                </button>
-              </div>
-              <div id="addonLoading" class="hidden py-6 text-center text-xs sm:text-sm font-semibold text-indigo-700 dark:text-indigo-300 animate-pulse-soft">
-                جاري التواصل مع Gemini API وتجهيز المحتوى المطلوب داخل نفس الصفحة...
-              </div>
-              <div id="addonBody" class="space-y-4 text-sm leading-7"></div>
-            </div>
-          </div>
-
-          <!-- Footer Navigation Between Lessons -->
-          <div class="px-5 sm:px-7 py-4 bg-slate-50 dark:bg-slate-900/70 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
-            <button id="prevLessonBtn" type="button" class="rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 px-4 py-2.5 text-xs sm:text-sm font-bold transition disabled:opacity-40 disabled:pointer-events-none">
-              → الدرس السابق
-            </button>
-
-            <div id="currentLessonIndexIndicator" class="text-xs font-bold text-slate-500 dark:text-slate-400 ltr-block">
-              Lesson 1 / 208
-            </div>
-
-            <button id="nextLessonBtn" type="button" class="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 text-xs sm:text-sm font-bold shadow-sm transition disabled:opacity-40 disabled:pointer-events-none">
-              الدرس التالي ←
-            </button>
-          </div>
-        </section>
       </main>
     </div>
+
+    <!-- Fixed Bottom Navigation Bar -->
+    <footer class="fixed bottom-0 left-0 right-0 z-30 h-16 bg-white/95 dark:bg-[#1E293B]/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-700/80 px-3 sm:px-6 flex items-center justify-between gap-2">
+      <button id="prevLessonBtn" type="button" class="rounded-xl border border-slate-300 dark:border-slate-600 bg-[#F8F9FA] dark:bg-[#0F172A] hover:bg-slate-200/60 dark:hover:bg-slate-800 px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold transition disabled:opacity-40 disabled:pointer-events-none">
+        → الدرس السابق
+      </button>
+
+      <button id="bottomCompleteBtn" type="button" class="rounded-xl bg-[#0D9488] hover:bg-[#0F766E] text-white px-4 sm:px-6 py-2 text-xs sm:text-sm font-bold shadow-xs transition flex items-center gap-2">
+        <span id="bottomCompleteIcon">○</span>
+        <span id="bottomCompleteText">تم الإنجاز</span>
+      </button>
+
+      <button id="nextLessonBtn" type="button" class="rounded-xl border border-slate-300 dark:border-slate-600 bg-[#F8F9FA] dark:bg-[#0F172A] hover:bg-slate-200/60 dark:hover:bg-slate-800 px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold transition disabled:opacity-40 disabled:pointer-events-none">
+        الدرس التالي ←
+      </button>
+    </footer>
   </div>
 
   <script>
     /**
      * =========================================================================
-     * ZERO-GAP CS BACHELOR'S PLATFORM — FULL CLIENT APPLICATION
-     * - 6 Stages, 26 Courses, 208 Lessons (Zero-Gap Audited Curriculum)
-     * - Persistent storage in localStorage (API Key, Completed Lessons,
-     *   Generated Lessons, Addon Responses, Theme)
-     * - Gemini 3 Flash Preview API integration with structured JSON output
-     *   and exponential backoff retry logic
+     * ZERO-GAP CS BACHELOR'S PLATFORM — ENHANCED EDITION
+     * Preserves exact localStorage keys:
+     * - zgcs_gemini_api_key_v1
+     * - zgcs_completed_lessons_v1
+     * - zgcs_generated_lessons_v1
+     * - zgcs_active_lesson_id_v1
+     * - zgcs_theme_mode_v1
+     * Plus glossary & flashcards persistence in localStorage.
      * =========================================================================
      */
 
@@ -427,15 +593,13 @@
       COMPLETED: 'zgcs_completed_lessons_v1',
       LESSONS_CACHE: 'zgcs_generated_lessons_v1',
       ACTIVE_LESSON: 'zgcs_active_lesson_id_v1',
-      THEME: 'zgcs_theme_mode_v1'
+      THEME: 'zgcs_theme_mode_v1',
+      GLOSSARY: 'zgcs_glossary_terms_v1'
     };
 
     const GEMINI_MODEL = 'gemini-3-flash-preview';
+    const MAX_OUTPUT_TOKENS = 65536;
 
-    /**
-     * Complete 6-Stage, 26-Course, 208-Lesson Curriculum Definition
-     * Each course has 8 structured lessons (01 to 08).
-     */
     const CURRICULUM_STAGES = [
       {
         id: 'stage-1',
@@ -865,9 +1029,6 @@
       }
     ];
 
-    /**
-     * Flatten all 208 lessons with rich metadata for fast lookup & navigation
-     */
     const ALL_LESSONS = [];
     CURRICULUM_STAGES.forEach((stage, stageIdx) => {
       stage.courses.forEach((course) => {
@@ -890,17 +1051,23 @@
       });
     });
 
-    /**
-     * Application State
-     */
     const state = {
       apiKey: localStorage.getItem(STORAGE_KEYS.API_KEY) || '',
       completedIds: new Set(JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED) || '[]')),
       lessonsCache: JSON.parse(localStorage.getItem(STORAGE_KEYS.LESSONS_CACHE) || '{}'),
+      glossaryMap: JSON.parse(localStorage.getItem(STORAGE_KEYS.GLOSSARY) || '{}'),
       activeLessonId: localStorage.getItem(STORAGE_KEYS.ACTIVE_LESSON) || 'HW101-01',
+      activeView: 'lesson', // 'lesson' | 'glossary' | 'flashcards'
       searchQuery: '',
+      glossaryQuery: '',
+      isFocusMode: false,
+      readerFontSize: 18,
       isGenerating: false,
       isAddonLoading: false,
+      isWidgetLoading: false,
+      isLabReviewing: false,
+      selectedTextForHelp: '',
+      currentFlashcard: null,
       expandedCourses: new Set(['HW101']),
       expandedStages: new Set(['stage-1'])
     };
@@ -909,11 +1076,9 @@
       state.activeLessonId = 'HW101-01';
     }
 
-    /**
-     * DOM References
-     */
     const dom = {
       toastContainer: document.getElementById('toastContainer'),
+      floatingDontUnderstandBtn: document.getElementById('floatingDontUnderstandBtn'),
       settingsModal: document.getElementById('settingsModal'),
       openSettingsBtn: document.getElementById('openSettingsBtn'),
       bannerOpenSettingsBtn: document.getElementById('bannerOpenSettingsBtn'),
@@ -933,22 +1098,31 @@
       confirmResetNo: document.getElementById('confirmResetNo'),
       themeToggleBtn: document.getElementById('themeToggleBtn'),
       themeIcon: document.getElementById('themeIcon'),
+      focusModeBtn: document.getElementById('focusModeBtn'),
+      focusModeIcon: document.getElementById('focusModeIcon'),
+      focusModeLabel: document.getElementById('focusModeLabel'),
+      viewLessonTabBtn: document.getElementById('viewLessonTabBtn'),
+      viewGlossaryTabBtn: document.getElementById('viewGlossaryTabBtn'),
+      viewFlashcardsTabBtn: document.getElementById('viewFlashcardsTabBtn'),
+      glossaryCountBadge: document.getElementById('glossaryCountBadge'),
+      headerProgressCompact: document.getElementById('headerProgressCompact'),
       mobileSidebarBtn: document.getElementById('mobileSidebarBtn'),
       curriculumSidebar: document.getElementById('curriculumSidebar'),
       sidebarBackdrop: document.getElementById('sidebarBackdrop'),
       lessonSearchInput: document.getElementById('lessonSearchInput'),
       clearSearchBtn: document.getElementById('clearSearchBtn'),
       curriculumTreeContainer: document.getElementById('curriculumTreeContainer'),
-      headerProgressText: document.getElementById('headerProgressText'),
-      headerProgressBar: document.getElementById('headerProgressBar'),
       sidebarCompletedBadge: document.getElementById('sidebarCompletedBadge'),
       sidebarProgressBar: document.getElementById('sidebarProgressBar'),
+      lessonViewContainer: document.getElementById('lessonViewContainer'),
+      glossaryViewContainer: document.getElementById('glossaryViewContainer'),
+      flashcardsViewContainer: document.getElementById('flashcardsViewContainer'),
       lessonIdBadge: document.getElementById('lessonIdBadge'),
       stageBadge: document.getElementById('stageBadge'),
       courseBadge: document.getElementById('courseBadge'),
       cachedBadge: document.getElementById('cachedBadge'),
-      lessonCompletedCheckbox: document.getElementById('lessonCompletedCheckbox'),
-      lessonCompletedLabel: document.getElementById('lessonCompletedLabel'),
+      fontDecreaseBtn: document.getElementById('fontDecreaseBtn'),
+      fontIncreaseBtn: document.getElementById('fontIncreaseBtn'),
       lessonTitleHeading: document.getElementById('lessonTitleHeading'),
       lessonFocusSubtitle: document.getElementById('lessonFocusSubtitle'),
       prereqsList: document.getElementById('prereqsList'),
@@ -956,6 +1130,7 @@
       generateLessonBtnText: document.getElementById('generateLessonBtnText'),
       simplerExampleBtn: document.getElementById('simplerExampleBtn'),
       extraQuizBtn: document.getElementById('extraQuizBtn'),
+      interactiveWidgetBtn: document.getElementById('interactiveWidgetBtn'),
       loadingState: document.getElementById('loadingState'),
       loadingTitle: document.getElementById('loadingTitle'),
       loadingSubtitle: document.getElementById('loadingSubtitle'),
@@ -965,27 +1140,41 @@
       objectivesBox: document.getElementById('objectivesBox'),
       deepExplanationBox: document.getElementById('deepExplanationBox'),
       examplesContainer: document.getElementById('examplesContainer'),
-      mainQuizSection: document.getElementById('mainQuizSection'),
       mainQuizScoreBadge: document.getElementById('mainQuizScoreBadge'),
       mainQuizContainer: document.getElementById('mainQuizContainer'),
+      savedExplanationsSection: document.getElementById('savedExplanationsSection'),
+      savedExplanationsList: document.getElementById('savedExplanationsList'),
+      interactiveWidgetPanel: document.getElementById('interactiveWidgetPanel'),
+      widgetPanelTitle: document.getElementById('widgetPanelTitle'),
+      closeWidgetBtn: document.getElementById('closeWidgetBtn'),
+      widgetLoading: document.getElementById('widgetLoading'),
+      widgetMountArea: document.getElementById('widgetMountArea'),
       dynamicAddonPanel: document.getElementById('dynamicAddonPanel'),
       addonIcon: document.getElementById('addonIcon'),
       addonTitle: document.getElementById('addonTitle'),
       closeAddonBtn: document.getElementById('closeAddonBtn'),
       addonLoading: document.getElementById('addonLoading'),
       addonBody: document.getElementById('addonBody'),
+      customConfusionInput: document.getElementById('customConfusionInput'),
+      submitConfusionBtn: document.getElementById('submitConfusionBtn'),
+      labCodeInput: document.getElementById('labCodeInput'),
+      reviewLabBtn: document.getElementById('reviewLabBtn'),
+      labReviewResultBox: document.getElementById('labReviewResultBox'),
+      glossarySearchInput: document.getElementById('glossarySearchInput'),
+      glossaryListContainer: document.getElementById('glossaryListContainer'),
+      nextFlashcardBtn: document.getElementById('nextFlashcardBtn'),
+      flashcardStage: document.getElementById('flashcardStage'),
       prevLessonBtn: document.getElementById('prevLessonBtn'),
-      nextLessonBtn: document.getElementById('nextLessonBtn'),
-      currentLessonIndexIndicator: document.getElementById('currentLessonIndexIndicator')
+      bottomCompleteBtn: document.getElementById('bottomCompleteBtn'),
+      bottomCompleteIcon: document.getElementById('bottomCompleteIcon'),
+      bottomCompleteText: document.getElementById('bottomCompleteText'),
+      nextLessonBtn: document.getElementById('nextLessonBtn')
     };
 
-    /**
-     * Show non-blocking notification toast
-     */
     function showToast(message, type = 'info') {
       const palette = {
-        info: 'bg-slate-900 text-white border-slate-700 dark:bg-slate-800',
-        success: 'bg-emerald-600 text-white border-emerald-500',
+        info: 'bg-[#1E293B] text-white border-slate-700',
+        success: 'bg-[#0D9488] text-white border-[#0F766E]',
         warning: 'bg-amber-600 text-white border-amber-500',
         error: 'bg-rose-600 text-white border-rose-500'
       };
@@ -993,7 +1182,6 @@
       el.className = `pointer-events-auto rounded-xl border px-4 py-3 text-xs sm:text-sm font-bold shadow-xl transition-all duration-300 ${palette[type] || palette.info}`;
       el.textContent = message;
       dom.toastContainer.appendChild(el);
-
       setTimeout(() => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(8px)';
@@ -1001,9 +1189,6 @@
       }, 3400);
     }
 
-    /**
-     * Theme initialization & toggle
-     */
     function initTheme() {
       const saved = localStorage.getItem(STORAGE_KEYS.THEME);
       const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -1018,9 +1203,6 @@
       dom.themeIcon.textContent = isDark ? '☀️' : '🌙';
     }
 
-    /**
-     * Persist state slices to localStorage
-     */
     function saveCompletedLessons() {
       localStorage.setItem(STORAGE_KEYS.COMPLETED, JSON.stringify([...state.completedIds]));
     }
@@ -1029,9 +1211,18 @@
       try {
         localStorage.setItem(STORAGE_KEYS.LESSONS_CACHE, JSON.stringify(state.lessonsCache));
       } catch (err) {
-        showToast('تنبيه: مساحة localStorage ممتلئة جزئياً، يُنصح بتصدير نسخة JSON.', 'warning');
+        showToast('تنبيه: مساحة localStorage ممتلئة جزئياً، صدّر نسخة JSON.', 'warning');
       }
       updateStorageStats();
+    }
+
+    function saveGlossaryMap() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.GLOSSARY, JSON.stringify(state.glossaryMap));
+      } catch (err) {
+        // Ignore quota warnings
+      }
+      updateGlossaryBadge();
     }
 
     function updateStorageStats() {
@@ -1039,31 +1230,70 @@
       dom.storageStatsLabel.textContent = `${count} / 208 Cached Lessons`;
     }
 
+    function updateGlossaryBadge() {
+      const count = Object.keys(state.glossaryMap).length;
+      dom.glossaryCountBadge.textContent = `(${count})`;
+    }
+
     function updateApiStatusUI() {
       const hasKey = Boolean(state.apiKey && state.apiKey.trim().length > 0);
-      dom.apiStatusDot.className = hasKey
-        ? 'h-2 w-2 rounded-full bg-emerald-400'
-        : 'h-2 w-2 rounded-full bg-amber-400';
+      dom.apiStatusDot.className = hasKey ? 'h-2 w-2 rounded-full bg-emerald-300' : 'h-2 w-2 rounded-full bg-amber-300';
       dom.missingApiBanner.classList.toggle('hidden', hasKey);
     }
 
-    /**
-     * Update global progress bars & counters across header and sidebar
-     */
     function updateProgressUI() {
-      const total = ALL_LESSONS.length; // 208
+      const total = ALL_LESSONS.length;
       const done = state.completedIds.size;
       const pct = total > 0 ? ((done / total) * 100).toFixed(1) : '0.0';
-
-      dom.headerProgressText.textContent = `${done} / ${total} (${pct}%)`;
-      dom.headerProgressBar.style.width = `${pct}%`;
-
+      dom.headerProgressCompact.textContent = `${done}/${total} (${pct}%)`;
       dom.sidebarCompletedBadge.textContent = `${done} / ${total} (${pct}%)`;
       dom.sidebarProgressBar.style.width = `${pct}%`;
     }
 
+    function setActiveView(viewName) {
+      state.activeView = viewName;
+      dom.lessonViewContainer.classList.toggle('hidden', viewName !== 'lesson');
+      dom.glossaryViewContainer.classList.toggle('hidden', viewName !== 'glossary');
+      dom.flashcardsViewContainer.classList.toggle('hidden', viewName !== 'flashcards');
+
+      const map = [
+        { btn: dom.viewLessonTabBtn, active: viewName === 'lesson' },
+        { btn: dom.viewGlossaryTabBtn, active: viewName === 'glossary' },
+        { btn: dom.viewFlashcardsTabBtn, active: viewName === 'flashcards' }
+      ];
+
+      map.forEach(({ btn, active }) => {
+        btn.className = active
+          ? 'view-mode-btn rounded-lg px-2.5 sm:px-3 py-1 text-xs font-bold bg-[#0D9488] text-white transition whitespace-nowrap'
+          : 'view-mode-btn rounded-lg px-2.5 sm:px-3 py-1 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition whitespace-nowrap';
+      });
+
+      if (viewName === 'glossary') {
+        renderGlossaryView();
+      } else if (viewName === 'flashcards') {
+        pickNextFlashcard();
+      }
+    }
+
+    function toggleFocusMode() {
+      state.isFocusMode = !state.isFocusMode;
+      if (state.isFocusMode) {
+        dom.curriculumSidebar.classList.add('lg:hidden');
+        dom.focusModeLabel.textContent = 'إظهار القائمة';
+        dom.focusModeIcon.textContent = '◧';
+      } else {
+        dom.curriculumSidebar.classList.remove('lg:hidden');
+        dom.focusModeLabel.textContent = 'وضع التركيز';
+        dom.focusModeIcon.textContent = '◫';
+      }
+    }
+
+    function applyReaderFontSize() {
+      document.documentElement.style.setProperty('--reader-size', `${state.readerFontSize}px`);
+    }
+
     /**
-     * Render the 6 Stages -> 26 Courses -> 208 Lessons Sidebar Tree
+     * Render Sidebar Tree (6 Stages, 26 Courses, 208 Lessons)
      */
     function renderSidebarTree() {
       const query = state.searchQuery.trim().toLowerCase();
@@ -1098,7 +1328,6 @@
               courseLessons.push({
                 id: lessonId,
                 title: lessonObj.title,
-                focus: lessonObj.focus,
                 isDone,
                 isCached
               });
@@ -1119,28 +1348,22 @@
                     data-lesson-id="${l.id}"
                     class="lesson-nav-btn w-full text-right rounded-xl px-2.5 py-2 text-xs flex items-start gap-2 transition ${
                       isActive
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300'
+                        ? 'bg-[#0D9488] text-white'
+                        : 'hover:bg-slate-100 dark:hover:bg-[#0F172A]/80 text-slate-700 dark:text-slate-300'
                     }"
                   >
                     <span class="mt-0.5 shrink-0 font-bold ${
-                      isActive
-                        ? 'text-white'
-                        : l.isDone
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : 'text-slate-400'
+                      isActive ? 'text-white' : l.isDone ? 'text-[#0D9488]' : 'text-slate-400'
                     }">${l.isDone ? '✓' : '○'}</span>
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center justify-between gap-1">
                         <span class="ltr-block font-bold text-[11px] ${
-                          isActive ? 'text-indigo-100' : 'text-indigo-600 dark:text-indigo-400'
+                          isActive ? 'text-teal-100' : 'text-[#0D9488]'
                         }">${l.id}</span>
                         ${
                           l.isCached
                             ? `<span class="text-[10px] px-1.5 py-0.2 rounded ${
-                                isActive
-                                  ? 'bg-white/20 text-white'
-                                  : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                                isActive ? 'bg-white/20 text-white' : 'bg-[#0D9488]/15 text-[#0D9488]'
                               }">محفوظ</span>`
                             : ''
                         }
@@ -1153,7 +1376,7 @@
               .join('');
 
             stageCoursesHtml.push(`
-              <div class="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 overflow-hidden">
+              <div class="rounded-xl border border-slate-200 dark:border-slate-700/70 bg-[#F8F9FA] dark:bg-[#0F172A]/50 overflow-hidden">
                 <button
                   type="button"
                   data-course-code="${course.code}"
@@ -1161,14 +1384,14 @@
                 >
                   <div class="min-w-0">
                     <div class="flex items-center gap-1.5">
-                      <span class="ltr-block text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400">${course.code}</span>
+                      <span class="ltr-block text-[11px] font-bold text-[#0D9488]">${course.code}</span>
                       <span class="text-[11px] text-slate-400 ltr-block">(${courseDoneCount}/8)</span>
                     </div>
                     <div class="text-xs font-bold truncate mt-0.5">${escapeHtml(course.name)}</div>
                   </div>
                   <span class="text-xs text-slate-400 shrink-0">${isCourseExpanded ? '▾' : '◂'}</span>
                 </button>
-                <div class="${isCourseExpanded ? 'block' : 'hidden'} p-1.5 space-y-1 border-t border-slate-200/70 dark:border-slate-800/70 bg-white dark:bg-slate-900">
+                <div class="${isCourseExpanded ? 'block' : 'hidden'} p-1.5 space-y-1 border-t border-slate-200 dark:border-slate-700/70 bg-white dark:bg-[#1E293B]">
                   ${lessonsListHtml}
                 </div>
               </div>
@@ -1179,14 +1402,14 @@
         if (stageHasMatch) {
           const isStageExpanded = query.length > 0 || state.expandedStages.has(stage.id);
           const stageCard = document.createElement('div');
-          stageCard.className = 'rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden';
+          stageCard.className = 'rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-[#1E293B] overflow-hidden';
           stageCard.innerHTML = `
             <button
               type="button"
               data-stage-id="${stage.id}"
-              class="stage-toggle-btn w-full px-3.5 py-3 flex items-center justify-between gap-2 text-right bg-slate-100/80 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              class="stage-toggle-btn w-full px-3.5 py-3 flex items-center justify-between gap-2 text-right bg-[#F8F9FA] dark:bg-[#0F172A]/80 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
             >
-              <span class="text-xs font-extrabold leading-snug">${escapeHtml(stage.title)}</span>
+              <span class="text-xs font-bold leading-snug">${escapeHtml(stage.title)}</span>
               <span class="text-xs text-slate-500 shrink-0">${isStageExpanded ? '−' : '+'}</span>
             </button>
             <div class="${isStageExpanded ? 'block' : 'hidden'} p-2 space-y-2">
@@ -1200,12 +1423,11 @@
       if (!anyMatch) {
         dom.curriculumTreeContainer.innerHTML = `
           <div class="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-6 text-center text-xs text-slate-500">
-            لا توجد دروس مطابقة لبحثك «${escapeHtml(state.searchQuery)}».
+            لا توجد نتائج مطابقة لبحثك «${escapeHtml(state.searchQuery)}».
           </div>
         `;
       }
 
-      // Bind stage, course, and lesson buttons
       dom.curriculumTreeContainer.querySelectorAll('.stage-toggle-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
           const id = btn.dataset.stageId;
@@ -1227,6 +1449,7 @@
       dom.curriculumTreeContainer.querySelectorAll('.lesson-nav-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
           const lessonId = btn.dataset.lessonId;
+          setActiveView('lesson');
           selectLesson(lessonId, { autoGenerateIfMissing: true });
           closeMobileSidebar();
         });
@@ -1243,46 +1466,41 @@
       dom.sidebarBackdrop.classList.add('hidden');
     }
 
-    /**
-     * Get active lesson object
-     */
     function getActiveLesson() {
       return ALL_LESSONS.find((l) => l.id === state.activeLessonId) || ALL_LESSONS[0];
     }
 
-    /**
-     * Select a lesson and render header + cached content (or trigger auto-generation)
-     */
     async function selectLesson(lessonId, options = { autoGenerateIfMissing: true }) {
       const found = ALL_LESSONS.find((l) => l.id === lessonId);
       if (!found) return;
 
       state.activeLessonId = found.id;
       localStorage.setItem(STORAGE_KEYS.ACTIVE_LESSON, found.id);
-
-      // Ensure stage & course are expanded in sidebar
       state.expandedStages.add(found.stageId);
       state.expandedCourses.add(found.courseCode);
 
-      // Hide addon panel when switching lessons
       dom.dynamicAddonPanel.classList.add('hidden');
       dom.addonBody.innerHTML = '';
+      dom.interactiveWidgetPanel.classList.add('hidden');
+      dom.widgetMountArea.innerHTML = '';
+      dom.labCodeInput.value = '';
+      dom.labReviewResultBox.classList.add('hidden');
+      dom.labReviewResultBox.innerHTML = '';
 
       renderLessonHeader(found);
       renderSidebarTree();
-      updatePrevNextButtons(found);
+      updateBottomBar(found);
 
       const cachedData = state.lessonsCache[found.id];
       if (cachedData) {
         dom.cachedBadge.classList.remove('hidden');
-        dom.generateLessonBtnText.textContent = 'إعادة توليد الدرس';
+        dom.generateLessonBtnText.textContent = 'إعادة توليد الدرس المسترسل';
         hideAllLessonStates();
         dom.renderedLessonContent.classList.remove('hidden');
-        renderStructuredLesson(cachedData);
+        renderStructuredLesson(found, cachedData);
       } else {
         dom.cachedBadge.classList.add('hidden');
-        dom.generateLessonBtnText.textContent = 'توليد الدرس الآن';
-
+        dom.generateLessonBtnText.textContent = 'توليد الدرس المسترسل';
         if (options.autoGenerateIfMissing && state.apiKey.trim()) {
           await generateAndCacheLesson(found);
         } else {
@@ -1304,47 +1522,68 @@
       dom.courseBadge.textContent = `${lesson.courseCode}: ${lesson.courseName}`;
       dom.lessonTitleHeading.textContent = lesson.title;
       dom.lessonFocusSubtitle.textContent = `المحاور الهندسية: ${lesson.focus}`;
-
-      const isDone = state.completedIds.has(lesson.id);
-      dom.lessonCompletedCheckbox.checked = isDone;
-      dom.lessonCompletedLabel.textContent = isDone ? 'مكتمل ✓' : 'تم إتمام الدرس';
-      dom.lessonCompletedLabel.className = isDone
-        ? 'text-xs font-extrabold text-emerald-600 dark:text-emerald-400'
-        : 'text-xs font-bold text-slate-700 dark:text-slate-200';
-
       dom.prereqsList.innerHTML = lesson.coursePrereqs
         .map(
           (p) =>
-            `<span class="ltr-block rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 text-[11px] font-semibold">${escapeHtml(p)}</span>`
+            `<span class="ltr-block rounded-md bg-[#F8F9FA] dark:bg-[#0F172A] border border-slate-200 dark:border-slate-700 px-2 py-0.5 text-[11px] font-semibold">${escapeHtml(p)}</span>`
         )
         .join('');
     }
 
-    function updatePrevNextButtons(lesson) {
-      dom.currentLessonIndexIndicator.textContent = `Lesson ${lesson.globalIndex + 1} / ${ALL_LESSONS.length}`;
+    function updateBottomBar(lesson) {
+      const isDone = state.completedIds.has(lesson.id);
       dom.prevLessonBtn.disabled = lesson.globalIndex <= 0;
       dom.nextLessonBtn.disabled = lesson.globalIndex >= ALL_LESSONS.length - 1;
+      dom.bottomCompleteIcon.textContent = isDone ? '✓' : '○';
+      dom.bottomCompleteText.textContent = isDone ? 'مكتمل (تم الإنجاز)' : 'تم الإنجاز';
+      dom.bottomCompleteBtn.className = isDone
+        ? 'rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white px-4 sm:px-6 py-2 text-xs sm:text-sm font-bold shadow-xs transition flex items-center gap-2'
+        : 'rounded-xl bg-[#0D9488] hover:bg-[#0F766E] text-white px-4 sm:px-6 py-2 text-xs sm:text-sm font-bold shadow-xs transition flex items-center gap-2';
     }
 
     /**
-     * Render structured lesson data into the DOM
+     * Auto-ingest key terms from a generated lesson into Zero-Gap Glossary
      */
-    function renderStructuredLesson(data) {
+    function ingestTermsToGlossary(lesson, terms) {
+      if (!Array.isArray(terms)) return;
+      let addedOrUpdated = false;
+      terms.forEach((t) => {
+        const key = `${(t.termEn || '').trim().toLowerCase()}|${(t.termAr || '').trim()}`;
+        if (!key.replace(/\|/g, '')) return;
+        state.glossaryMap[key] = {
+          termAr: t.termAr || '',
+          termEn: t.termEn || '',
+          definitionAr: t.definitionAr || '',
+          lessonId: lesson.id,
+          lessonTitle: lesson.title,
+          courseCode: lesson.courseCode
+        };
+        addedOrUpdated = true;
+      });
+      if (addedOrUpdated) {
+        saveGlossaryMap();
+      }
+    }
+
+    function renderStructuredLesson(lesson, data) {
+      // Auto-save terms into Zero-Gap Glossary
+      ingestTermsToGlossary(lesson, data.keyTerms || []);
+
       // 1. Key Terms
       const terms = Array.isArray(data.keyTerms) ? data.keyTerms : [];
       dom.keyTermsGrid.innerHTML = terms
         .map(
           (t) => `
-            <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/50 p-4 space-y-1.5">
-              <div class="flex items-center justify-between gap-2">
-                <span class="font-extrabold text-sm text-slate-900 dark:text-white">${escapeHtml(t.termAr || '')}</span>
+            <div class="rounded-xl border border-slate-200 dark:border-slate-700/80 bg-[#F8F9FA] dark:bg-[#0F172A]/60 p-4 space-y-1.5">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span class="font-bold text-sm sm:text-base">${escapeHtml(t.termAr || '')}</span>
                 ${
                   t.termEn
-                    ? `<span class="ltr-block rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 text-[11px] font-semibold">${escapeHtml(t.termEn)}</span>`
+                    ? `<span class="ltr-block rounded-md bg-[#0D9488]/15 text-[#0D9488] px-2 py-0.5 text-xs font-semibold">${escapeHtml(t.termEn)}</span>`
                     : ''
                 }
               </div>
-              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">${escapeHtml(t.definitionAr || '')}</p>
+              <p class="text-slate-700 dark:text-slate-300 leading-relaxed">${formatInlineCode(t.definitionAr || '')}</p>
             </div>
           `
         )
@@ -1353,51 +1592,51 @@
       // 2. Objectives & Why It Matters
       const objs = Array.isArray(data.objectives) ? data.objectives : [];
       dom.objectivesBox.innerHTML = `
-        <ul class="list-disc pr-5 space-y-1.5 text-slate-700 dark:text-slate-200">
-          ${objs.map((o) => `<li>${escapeHtml(o)}</li>`).join('')}
+        <ul class="list-disc pr-5 space-y-2">
+          ${objs.map((o) => `<li>${formatInlineCode(o)}</li>`).join('')}
         </ul>
         ${
           data.whyItMatters
-            ? `<div class="pt-2 border-t border-emerald-500/20 text-xs sm:text-sm text-emerald-900 dark:text-emerald-200 font-semibold">
-                 <span class="font-extrabold">الأهمية الهندسية وما يفتحه لاحقاً:</span> ${escapeHtml(data.whyItMatters)}
+            ? `<div class="pt-3 border-t border-slate-200 dark:border-slate-700 font-semibold text-[#0F766E] dark:text-[#5EEAD4]">
+                 <span>الأهمية الهندسية:</span> ${formatInlineCode(data.whyItMatters)}
                </div>`
             : ''
         }
       `;
 
-      // 3. Deep Explanation Paragraphs
+      // 3. Exhaustive Step-by-Step Explanation
       const paras = Array.isArray(data.deepExplanationParagraphs) ? data.deepExplanationParagraphs : [];
       dom.deepExplanationBox.innerHTML = paras
         .map(
-          (p) => `<p class="text-slate-700 dark:text-slate-200 whitespace-pre-line">${formatInlineCode(p)}</p>`
+          (p) => `<p class="whitespace-pre-line">${formatInlineCode(p)}</p>`
         )
         .join('');
 
-      // 4. Code & Hardware/Memory Examples (Strictly LTR)
+      // 4. Worked Examples (LTR)
       const examples = Array.isArray(data.examples) ? data.examples : [];
       dom.examplesContainer.innerHTML = examples
         .map((ex, idx) => {
           const codeStr = ex.code || '';
           return `
-            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-950 text-slate-100 overflow-hidden shadow-xs">
+            <div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-950 text-slate-100 overflow-hidden">
               <div class="px-4 py-2.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2 min-w-0">
-                  <span class="ltr-block rounded bg-cyan-500/20 text-cyan-300 px-2 py-0.5 text-[11px] font-bold">${escapeHtml(ex.language || 'code')}</span>
-                  <span class="text-xs font-bold text-slate-200 truncate">${escapeHtml(ex.title || `مثال ${idx + 1}`)}</span>
+                  <span class="ltr-block rounded bg-[#0D9488]/25 text-[#5EEAD4] px-2 py-0.5 text-xs font-bold">${escapeHtml(ex.language || 'code')}</span>
+                  <span class="text-xs font-bold text-slate-200 truncate">${escapeHtml(ex.title || `مثال محلول ${idx + 1}`)}</span>
                 </div>
                 <button
                   type="button"
                   data-copy-target="codeSnippet_${idx}"
-                  class="copy-code-btn rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 text-[11px] font-semibold transition shrink-0"
+                  class="copy-code-btn rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 text-xs font-semibold transition shrink-0"
                 >
                   نسخ الكود
                 </button>
               </div>
-              <pre id="codeSnippet_${idx}" class="code-box p-4 text-xs sm:text-[13px] leading-relaxed text-emerald-300">${escapeHtml(codeStr)}</pre>
+              <pre id="codeSnippet_${idx}" class="code-box p-4 text-xs sm:text-[13.5px] leading-relaxed text-emerald-300">${escapeHtml(codeStr)}</pre>
               ${
                 ex.explanationAr
-                  ? `<div class="px-4 py-3 bg-slate-900/70 border-t border-slate-800 text-xs sm:text-sm text-slate-300 leading-relaxed">
-                       <span class="font-bold text-cyan-300 ml-1">توضيح التنفيذ:</span>
+                  ? `<div class="px-4 py-3 bg-slate-900/80 border-t border-slate-800 text-xs sm:text-sm text-slate-200 leading-relaxed">
+                       <span class="font-bold text-[#5EEAD4] ml-1">تفصيل التنفيذ والهاردوير/الذاكرة:</span>
                        ${formatInlineCode(ex.explanationAr)}
                      </div>`
                   : ''
@@ -1407,28 +1646,71 @@
         })
         .join('');
 
-      // Attach clipboard copy handlers
       dom.examplesContainer.querySelectorAll('.copy-code-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
-          const targetId = btn.dataset.copyTarget;
-          const preEl = document.getElementById(targetId);
+          const preEl = document.getElementById(btn.dataset.copyTarget);
           if (!preEl) return;
           copyTextFallback(preEl.textContent || '');
-          showToast('تم نسخ الكود إلى الحافظة.', 'success');
+          showToast('تم نسخ الكود بنجاح.', 'success');
         });
       });
 
-      // 5. Main Interactive Quiz
+      // 5. Quiz
       renderInteractiveQuiz(data.quiz || [], dom.mainQuizContainer, dom.mainQuizScoreBadge);
+
+      // 6. Saved "مش فاهم" explanations attached to this lesson
+      renderSavedLessonExplanations(data.customExplanations || []);
+
+      // 7. Saved Lab Review if present
+      if (data.labReview) {
+        renderLabReviewBox(data.labReview);
+      }
     }
 
-    /**
-     * Render interactive multiple-choice quiz questions with instant feedback
-     */
+    function renderSavedLessonExplanations(list) {
+      if (!Array.isArray(list) || list.length === 0) {
+        dom.savedExplanationsSection.classList.add('hidden');
+        dom.savedExplanationsList.innerHTML = '';
+        return;
+      }
+      dom.savedExplanationsSection.classList.remove('hidden');
+      dom.savedExplanationsList.innerHTML = list
+        .map(
+          (item, i) => `
+            <div class="rounded-2xl border border-[#0D9488]/30 bg-[#0D9488]/5 p-4 sm:p-5 space-y-3">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-[#0D9488]/15 text-[#0D9488]">
+                  ${item.source === 'selection' ? 'تظليل نص' : 'سؤال إضافي'} #${i + 1}
+                </span>
+                <span class="ltr-block text-[11px] text-slate-400">${escapeHtml(item.createdAt || '')}</span>
+              </div>
+              <div class="rounded-xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 p-3 text-xs sm:text-sm font-bold">
+                «${escapeHtml(item.query || '')}»
+              </div>
+              <div class="whitespace-pre-line text-sm leading-8">${formatInlineCode(item.explanationAr || '')}</div>
+              ${
+                item.realWorldAnalogyAr
+                  ? `<div class="rounded-xl bg-white dark:bg-[#1E293B] border-r-4 border-[#0D9488] p-3.5 text-sm">
+                       <strong class="text-[#0D9488] block mb-1">تشبيه من الواقع:</strong>
+                       <span class="whitespace-pre-line">${formatInlineCode(item.realWorldAnalogyAr)}</span>
+                     </div>`
+                  : ''
+              }
+              ${
+                item.stepByStepCode
+                  ? `<pre class="code-box rounded-xl bg-slate-950 text-emerald-300 p-3.5 text-xs">${escapeHtml(item.stepByStepCode)}</pre>`
+                  : ''
+              }
+            </div>
+          `
+        )
+        .join('');
+    }
+
     function renderInteractiveQuiz(questions, containerEl, badgeEl) {
       if (!Array.isArray(questions) || questions.length === 0) {
         containerEl.innerHTML = `<p class="text-xs text-slate-500">لا توجد أسئلة متاحة حالياً.</p>`;
-        badgeEl.classList.add('hidden');
+        if (badgeEl) badgeEl.classList.add('hidden');
         return;
       }
 
@@ -1436,16 +1718,18 @@
       const answeredMap = new Map();
       let correctCount = 0;
 
-      badgeEl.classList.remove('hidden');
-      badgeEl.textContent = `Score: 0 / ${total}`;
+      if (badgeEl) {
+        badgeEl.classList.remove('hidden');
+        badgeEl.textContent = `Score: 0 / ${total}`;
+      }
 
       containerEl.innerHTML = questions
         .map((q, qIdx) => {
           const options = Array.isArray(q.options) ? q.options : [];
           return `
-            <div class="quiz-card rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 p-4 sm:p-5 space-y-3" data-q-index="${qIdx}">
-              <div class="font-bold text-sm sm:text-[15px] leading-relaxed text-slate-900 dark:text-white">
-                <span class="text-indigo-600 dark:text-indigo-400 font-extrabold ml-1.5">س${qIdx + 1}:</span>
+            <div class="quiz-card rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-[#F8F9FA] dark:bg-[#0F172A]/60 p-4 sm:p-5 space-y-3" data-q-index="${qIdx}">
+              <div class="font-bold text-sm sm:text-base leading-relaxed">
+                <span class="text-[#0D9488] font-bold ml-1.5">س${qIdx + 1}:</span>
                 ${formatInlineCode(q.questionAr || '')}
               </div>
               <div class="space-y-2">
@@ -1456,10 +1740,10 @@
                         type="button"
                         data-q-index="${qIdx}"
                         data-o-index="${oIdx}"
-                        class="quiz-option-btn w-full text-right rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-indigo-500/60 px-4 py-2.5 text-xs sm:text-sm font-semibold transition flex items-center justify-between gap-2"
+                        class="quiz-option-btn w-full text-right rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1E293B] hover:border-[#0D9488] px-4 py-2.5 text-xs sm:text-sm font-semibold transition flex items-center justify-between gap-2"
                       >
                         <span>${formatInlineCode(opt)}</span>
-                        <span class="option-mark text-xs font-extrabold"></span>
+                        <span class="option-mark text-xs font-bold"></span>
                       </button>
                     `
                   )
@@ -1484,7 +1768,6 @@
           const correctIndex = Number(qData.correctIndex ?? 0);
           const isRight = oIdx === correctIndex;
 
-          // Update score if not previously answered or if changed
           const prevAnswer = answeredMap.get(qIdx);
           if (prevAnswer === undefined) {
             if (isRight) correctCount++;
@@ -1495,49 +1778,37 @@
           answeredMap.set(qIdx, isRight);
 
           allBtns.forEach((b, idx) => {
-            b.classList.remove(
-              'border-emerald-500',
-              'bg-emerald-500/10',
-              'text-emerald-800',
-              'dark:text-emerald-200',
-              'border-rose-500',
-              'bg-rose-500/10',
-              'text-rose-800',
-              'dark:text-rose-200'
-            );
+            b.classList.remove('border-emerald-500', 'bg-emerald-500/15', 'text-emerald-800', 'dark:text-emerald-200', 'border-rose-500', 'bg-rose-500/15', 'text-rose-800', 'dark:text-rose-200');
             const mark = b.querySelector('.option-mark');
             mark.textContent = '';
 
             if (idx === correctIndex) {
-              b.classList.add('border-emerald-500', 'bg-emerald-500/10', 'text-emerald-800', 'dark:text-emerald-200');
+              b.classList.add('border-emerald-500', 'bg-emerald-500/15', 'text-emerald-800', 'dark:text-emerald-200');
               mark.textContent = '✓ صحيح';
             } else if (idx === oIdx && !isRight) {
-              b.classList.add('border-rose-500', 'bg-rose-500/10', 'text-rose-800', 'dark:text-rose-200');
+              b.classList.add('border-rose-500', 'bg-rose-500/15', 'text-rose-800', 'dark:text-rose-200');
               mark.textContent = '✕';
             }
           });
 
-          feedbackEl.classList.remove('hidden', 'bg-emerald-500/10', 'text-emerald-800', 'dark:text-emerald-200', 'bg-rose-500/10', 'text-rose-800', 'dark:text-rose-200');
+          feedbackEl.classList.remove('hidden', 'bg-emerald-500/15', 'text-emerald-800', 'dark:text-emerald-200', 'bg-rose-500/15', 'text-rose-800', 'dark:text-rose-200');
           if (isRight) {
-            feedbackEl.classList.add('bg-emerald-500/10', 'text-emerald-800', 'dark:text-emerald-200');
-            feedbackEl.innerHTML = `<strong>إجابة صحيحة!</strong> ${formatInlineCode(qData.explanationAr || '')}`;
+            feedbackEl.classList.add('bg-emerald-500/15', 'text-emerald-800', 'dark:text-emerald-200');
+            feedbackEl.innerHTML = `<strong>إجابة صحيحة:</strong> ${formatInlineCode(qData.explanationAr || '')}`;
           } else {
-            feedbackEl.classList.add('bg-rose-500/10', 'text-rose-800', 'dark:text-rose-200');
-            feedbackEl.innerHTML = `<strong>إجابة غير دقيقة.</strong> ${formatInlineCode(qData.explanationAr || '')}`;
+            feedbackEl.classList.add('bg-rose-500/15', 'text-rose-800', 'dark:text-rose-200');
+            feedbackEl.innerHTML = `<strong>إجابة غير دقيقة:</strong> ${formatInlineCode(qData.explanationAr || '')}`;
           }
 
-          badgeEl.textContent = `Score: ${correctCount} / ${total}`;
+          if (badgeEl) badgeEl.textContent = `Score: ${correctCount} / ${total}`;
         });
       });
     }
 
-    /**
-     * Format inline backticked technical terms/code into LTR spans
-     */
     function formatInlineCode(text) {
       const escaped = escapeHtml(String(text || ''));
       return escaped.replace(/`([^`]+)`/g, (_, codePart) => {
-        return `<code class="ltr-block inline-block rounded bg-slate-200/80 dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.2 text-[12px] font-semibold">${codePart}</code>`;
+        return `<code class="ltr-block inline-block rounded bg-slate-200/80 dark:bg-[#0F172A] text-[#0F766E] dark:text-[#5EEAD4] px-1.5 py-0.2 text-[13px] font-semibold">${codePart}</code>`;
       });
     }
 
@@ -1560,19 +1831,27 @@
       try {
         document.execCommand('copy');
       } catch (e) {
-        // Ignore if blocked
+        // Ignore
       }
       document.body.removeChild(ta);
     }
 
     /**
-     * Call Gemini API with exponential backoff retry
+     * Gemini API call with maxOutputTokens: 65536 and exponential backoff
      */
     async function callGeminiAPI(payload, maxRetries = 4) {
       const key = (state.apiKey || '').trim();
       if (!key) {
         throw new Error('MISSING_API_KEY');
       }
+
+      const finalPayload = {
+        ...payload,
+        generationConfig: {
+          maxOutputTokens: MAX_OUTPUT_TOKENS,
+          ...(payload.generationConfig || {})
+        }
+      };
 
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(key)}`;
       let delayMs = 1000;
@@ -1582,7 +1861,7 @@
           const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(finalPayload)
           });
 
           if (!response.ok) {
@@ -1619,27 +1898,26 @@
     }
 
     /**
-     * Build Zero-Gap system instruction for lessons
+     * Exhaustive Zero-Gap System Instruction forbidding summarization or shortcuts
      */
-    function buildZeroGapSystemInstruction(lesson) {
+    function buildExhaustiveZeroGapInstruction(lesson) {
       return `
 أنت أستاذ جامعي ومحاضر تقني صارم في علوم الحاسب ضمن منهج "Zero-Gap CS Bachelor's Curriculum" (26 كورس، 208 درس).
-التزم بالقواعد التالية بدقة مطلقة:
-1. Zero-Gap Dependency Rule: لا تستخدم أو تفترض أي مصطلح متقدم لم يُشرح بعد في ترتيب المنهج؛ عرّف كل مصطلح جديد من الصفر بوضوح. الدرس الحالي هو (${lesson.id}: ${lesson.title}) ضمن الكورس (${lesson.courseCode}: ${lesson.courseName}) ومتطلباته السابقة هي (${lesson.coursePrereqs.join(', ')}).
-2. اللغة: جميع الشروحات والأسئلة والتعريفات باللغة العربية المصرية الواضحة والعميقة والمنهجية (مصري عميق هندسي بدون سطحية).
-3. الأكواد والمصطلحات التقنية الإنجليزية: أي كود أو أوامر أو مخرجات أو أسماء متغيرات أو مصطلحات إنجليزية يجب أن تكون بالإنجليزية وبوضوح داخل حقول الكود أو بين علامتي backtick \`like_this\`.
-4. التسلسل: ابدأ بالمصطلحات الأساسية، ثم الهدف وأهميته، ثم الشرح العميق الكامل خطوة بخطوة، ثم الأمثلة العملية، ثم كويز تفاعلي.
-أعد المخرجات بصيغة JSON مطابقة تماماً للمخطط المطلوب بدون أي نصوص خارج JSON.
+القواعد الإلزامية المطلقة:
+1. ممنوع منعاً باتاً التلخيص أو الاختصار أو القفز فوق الخطوات أو الاكتفاء بعناوين عامة: اشرح باستفاضة وبشكل مسترسل وعميق بالمصري كأنك محاضر يشرح من الصفر المطلق خطوة بخطوة، مع تفصيل ما يحدث في الهاردوير والذاكرة والبتات والخطوات الحسابية، وأمثلة محلولة بالكامل.
+2. Zero-Gap Rule: عرّف كل مصطلح جديد من الصفر دون افتراض معرفة مسبقة غير مذكورة في المتطلبات (${lesson.coursePrereqs.join(', ')}). الدرس الحالي: (${lesson.id}: ${lesson.title}) ضمن (${lesson.courseCode}: ${lesson.courseName}).
+3. اللغة: الشرح والأسئلة والتعريفات باللغة العربية المصرية العميقة والواضحة؛ وأي كود أو أوامر أو مخرجات أو أسماء تقنية إنجليزية تُكتب بالإنجليزية وبوضوح في حقول الكود أو داخل \`backticks\`.
+4. أعد المخرجات بصيغة JSON صالحة ومطابقة للمخطط فقط.
       `.trim();
     }
 
     /**
-     * Generate and cache full lesson in localStorage
+     * Generate and cache exhaustive lesson in localStorage
      */
     async function generateAndCacheLesson(lesson) {
       if (!state.apiKey.trim()) {
         dom.openSettingsBtn.click();
-        showToast('من فضلك أدخل مفتاح Gemini API أولاً لتوليد الدروس.', 'warning');
+        showToast('من فضلك أدخل مفتاح Gemini API أولاً.', 'warning');
         return;
       }
       if (state.isGenerating) return;
@@ -1648,24 +1926,24 @@
       dom.generateLessonBtn.disabled = true;
       hideAllLessonStates();
       dom.loadingState.classList.remove('hidden');
-      dom.loadingTitle.textContent = `جاري توليد الدرس ${lesson.id}: ${lesson.title}...`;
-      dom.loadingSubtitle.textContent = 'يتم تطبيق قواعد Zero-Gap وبناء المصطلحات والشرح العميق والأمثلة والكويز التفاعلي.';
+      dom.loadingTitle.textContent = `جاري توليد الدرس المسترسل ${lesson.id}: ${lesson.title}...`;
+      dom.loadingSubtitle.textContent = 'يتم كتابة شرح مسترسل طويل ومفصل خطوة بخطوة دون اختصار مع أمثلة محلولة وكويز.';
 
       const userPrompt = `
-اشرح الدرس التالي بالتفصيل العميق الكامل وفق منهج Zero-Gap:
+اكتب شرحاً جامعاً ومسترسلاً وطويلاً ومفصلاً للغاية (بدون أي تلخيص أو اختصار) للدرس التالي:
 - معرف الدرس: ${lesson.id}
 - المرحلة: ${lesson.stageTitle}
 - الكورس: ${lesson.courseCode} - ${lesson.courseName}
 - عنوان الدرس: ${lesson.title}
-- المحاور والمفاهيم المطلوبة: ${lesson.focus}
+- المحاور: ${lesson.focus}
 - المتطلبات السابقة: ${lesson.coursePrereqs.join(', ')}
 
-قدم شرحاً عميقاً ومتدرجاً خطوة بخطوة في الهاردوير/الذاكرة/الرياضيات/البرمجة بحسب طبيعة الدرس، مع أمثلة كود أو تتبع واضحة وكويز من 4 أسئلة اختيار من متعدد.
+اجعل مصفوفة deepExplanationParagraphs تحتوي على 6 إلى 10 فقرات مسترسلة وعميقة جداً تشرح الفكرة خطوة بخطوة وتوضح ما يحدث في الهاردوير والذاكرة، مع أمثلة محلولة بالكامل وكويز من 4 أسئلة.
       `.trim();
 
       const payload = {
         systemInstruction: {
-          parts: [{ text: buildZeroGapSystemInstruction(lesson) }]
+          parts: [{ text: buildExhaustiveZeroGapInstruction(lesson) }]
         },
         contents: [
           {
@@ -1738,25 +2016,34 @@
         const rawJsonText = await callGeminiAPI(payload);
         const parsed = JSON.parse(rawJsonText);
 
+        // Preserve any prior customExplanations or labReview if regenerating
+        const prev = state.lessonsCache[lesson.id] || {};
+        if (Array.isArray(prev.customExplanations)) {
+          parsed.customExplanations = prev.customExplanations;
+        }
+        if (prev.labReview) {
+          parsed.labReview = prev.labReview;
+        }
+
         state.lessonsCache[lesson.id] = parsed;
         saveLessonsCache();
         renderSidebarTree();
 
         if (state.activeLessonId === lesson.id) {
           dom.cachedBadge.classList.remove('hidden');
-          dom.generateLessonBtnText.textContent = 'إعادة توليد الدرس';
+          dom.generateLessonBtnText.textContent = 'إعادة توليد الدرس المسترسل';
           hideAllLessonStates();
           dom.renderedLessonContent.classList.remove('hidden');
-          renderStructuredLesson(parsed);
+          renderStructuredLesson(lesson, parsed);
         }
 
-        showToast(`تم توليد وحفظ الدرس ${lesson.id} بنجاح!`, 'success');
+        showToast(`تم توليد وحفظ الدرس المسترسل ${lesson.id} بنجاح!`, 'success');
       } catch (err) {
         if (state.activeLessonId === lesson.id) {
           hideAllLessonStates();
           if (state.lessonsCache[lesson.id]) {
             dom.renderedLessonContent.classList.remove('hidden');
-            renderStructuredLesson(state.lessonsCache[lesson.id]);
+            renderStructuredLesson(lesson, state.lessonsCache[lesson.id]);
           } else {
             dom.emptyLessonState.classList.remove('hidden');
           }
@@ -1765,7 +2052,7 @@
         if (err.message === 'MISSING_API_KEY') {
           showToast('مفتاح Gemini API غير موجود. أضفه من الإعدادات.', 'warning');
         } else {
-          showToast(`تعذر توليد الدرس حالياً: ${err.message}`, 'error');
+          showToast(`تعذر توليد الدرس: ${err.message}`, 'error');
         }
       } finally {
         state.isGenerating = false;
@@ -1774,9 +2061,137 @@
     }
 
     /**
-     * Handle in-page Addon actions:
-     * - 'simpler': اشرحلي بمثال أبسط
-     * - 'extra_quiz': اعملي اختبار إضافي
+     * Handle "مش فاهم" (both text selection floating button & bottom box)
+     * Generates an exhaustive breakdown and appends it into the cached lesson in localStorage.
+     */
+    async function runDontUnderstandExpansion(queryText, source = 'box') {
+      const cleaned = (queryText || '').trim();
+      if (!cleaned) {
+        showToast('اكتب أو ظلّل الجزئية غير المفهومة أولاً.', 'warning');
+        return;
+      }
+      if (!state.apiKey.trim()) {
+        dom.openSettingsBtn.click();
+        showToast('أدخل مفتاح Gemini API أولاً.', 'warning');
+        return;
+      }
+      if (state.isAddonLoading) return;
+
+      const lesson = getActiveLesson();
+      state.isAddonLoading = true;
+      dom.submitConfusionBtn.disabled = true;
+
+      dom.dynamicAddonPanel.classList.remove('hidden');
+      dom.addonIcon.textContent = '❓';
+      dom.addonTitle.textContent = `شرح مسترسل معمق لجزئية «مش فاهم» — ${lesson.id}`;
+      dom.addonLoading.classList.remove('hidden');
+      dom.addonBody.innerHTML = '';
+      dom.dynamicAddonPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      const payload = {
+        systemInstruction: {
+          parts: [{ text: buildExhaustiveZeroGapInstruction(lesson) }]
+        },
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                text: `
+الطالب يقول «مش فاهم» بخصوص الجزئية التالية في الدرس (${lesson.id}: ${lesson.title} — ${lesson.focus}):
+"${cleaned}"
+
+فكّك هذه الجزئية بالتفصيل الممل والعميق جداً بالمصري خطوة بخطوة دون أي اختصار، مع تشبيهات واضحة من الواقع ومثال كود أو تتبع خطوة بخطوة.
+                `.trim()
+              }
+            ]
+          }
+        ],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'OBJECT',
+            properties: {
+              explanationAr: { type: 'STRING' },
+              realWorldAnalogyAr: { type: 'STRING' },
+              stepByStepCode: { type: 'STRING' }
+            },
+            required: ['explanationAr', 'realWorldAnalogyAr', 'stepByStepCode']
+          }
+        }
+      };
+
+      try {
+        const raw = await callGeminiAPI(payload);
+        const parsed = JSON.parse(raw);
+
+        if (!state.lessonsCache[lesson.id]) {
+          state.lessonsCache[lesson.id] = {
+            keyTerms: [],
+            objectives: [],
+            whyItMatters: '',
+            deepExplanationParagraphs: [],
+            examples: [],
+            quiz: [],
+            customExplanations: []
+          };
+        }
+        if (!Array.isArray(state.lessonsCache[lesson.id].customExplanations)) {
+          state.lessonsCache[lesson.id].customExplanations = [];
+        }
+
+        const entry = {
+          source,
+          query: cleaned,
+          explanationAr: parsed.explanationAr || '',
+          realWorldAnalogyAr: parsed.realWorldAnalogyAr || '',
+          stepByStepCode: parsed.stepByStepCode || '',
+          createdAt: new Date().toLocaleString('ar-EG')
+        };
+
+        state.lessonsCache[lesson.id].customExplanations.push(entry);
+        saveLessonsCache();
+
+        dom.addonLoading.classList.add('hidden');
+        dom.addonBody.innerHTML = `
+          <div class="space-y-4">
+            <div class="rounded-xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 p-3.5 text-xs sm:text-sm font-bold">
+              الجزئية المشروحة: «${escapeHtml(cleaned)}»
+            </div>
+            <p class="whitespace-pre-line text-sm leading-8">${formatInlineCode(entry.explanationAr)}</p>
+            <div class="rounded-xl bg-white dark:bg-[#1E293B] border-r-4 border-[#0D9488] p-4">
+              <div class="font-bold text-xs text-[#0D9488] mb-1">تشبيه من الواقع اليومي:</div>
+              <p class="whitespace-pre-line text-sm leading-8">${formatInlineCode(entry.realWorldAnalogyAr)}</p>
+            </div>
+            ${
+              entry.stepByStepCode
+                ? `<pre class="code-box rounded-xl bg-slate-950 text-emerald-300 p-4 text-xs sm:text-[13px]">${escapeHtml(entry.stepByStepCode)}</pre>`
+                : ''
+            }
+            <p class="text-xs text-[#0D9488] font-bold">✓ تم إلحاق هذا الشرح وحفظه داخل الدرس في localStorage.</p>
+          </div>
+        `;
+
+        if (state.activeLessonId === lesson.id) {
+          dom.renderedLessonContent.classList.remove('hidden');
+          dom.emptyLessonState.classList.add('hidden');
+          renderSavedLessonExplanations(state.lessonsCache[lesson.id].customExplanations);
+        }
+        if (source === 'box') {
+          dom.customConfusionInput.value = '';
+        }
+        showToast('تم حفظ الشرح المسترسل داخل الدرس.', 'success');
+      } catch (err) {
+        dom.addonLoading.classList.add('hidden');
+        dom.addonBody.innerHTML = `<p class="text-rose-600 dark:text-rose-400 font-bold">حدث خطأ أثناء الشرح: ${escapeHtml(err.message)}</p>`;
+      } finally {
+        state.isAddonLoading = false;
+        dom.submitConfusionBtn.disabled = false;
+      }
+    }
+
+    /**
+     * Handle "اشرحلي بمثال أبسط" and "اعملي اختبار إضافي"
      */
     async function runLessonAddon(mode) {
       const lesson = getActiveLesson();
@@ -1795,31 +2210,21 @@
       dom.dynamicAddonPanel.classList.remove('hidden');
       dom.addonIcon.textContent = isSimpler ? '💡' : '📝';
       dom.addonTitle.textContent = isSimpler
-        ? `شرح بمثال أبسط من الحياة اليومية — ${lesson.id}`
-        : `اختبار إضافي متقدم للتحقق من الإتقان — ${lesson.id}`;
+        ? `مثال أبسط من الحياة اليومية — ${lesson.id}`
+        : `اختبار إضافي متقدم — ${lesson.id}`;
       dom.addonLoading.classList.remove('hidden');
       dom.addonBody.innerHTML = '';
       dom.dynamicAddonPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-      const existingLessonContext = state.lessonsCache[lesson.id]
-        ? JSON.stringify(state.lessonsCache[lesson.id]).slice(0, 2500)
-        : lesson.focus;
-
       if (isSimpler) {
         const payload = {
-          systemInstruction: {
-            parts: [{ text: buildZeroGapSystemInstruction(lesson) }]
-          },
+          systemInstruction: { parts: [{ text: buildExhaustiveZeroGapInstruction(lesson) }] },
           contents: [
             {
               role: 'user',
               parts: [
                 {
-                  text: `
-بالنسبة للدرس (${lesson.id}: ${lesson.title} — ${lesson.focus}):
-اشرحلي الفكرة الأساسية بمثال أبسط جداً وقريب من الواقع اليومي بالمصري، ثم وضح كيف ينطبق هذا التشبيه تقنياً مع مثال كود قصير ومباشر بالإنجليزية.
-سياق الدرس: ${existingLessonContext}
-                  `.trim()
+                  text: `اشرح فكرة الدرس (${lesson.id}: ${lesson.title} — ${lesson.focus}) بمثال أبسط جداً من الحياة اليومية بالمصري باستفاضة، ثم اربطه تقنياً بكود واضح بالإنجليزية.`
                 }
               ]
             }
@@ -1846,39 +2251,31 @@
           dom.addonLoading.classList.add('hidden');
           dom.addonBody.innerHTML = `
             <div class="space-y-4">
-              <h4 class="font-extrabold text-base text-slate-900 dark:text-white">${escapeHtml(data.analogyTitleAr || 'مثال مبسط')}</h4>
-              <p class="whitespace-pre-line text-slate-700 dark:text-slate-200">${formatInlineCode(data.simpleStoryAr || '')}</p>
-              <div class="rounded-xl bg-white dark:bg-slate-900 border border-indigo-500/20 p-4">
-                <div class="font-extrabold text-xs text-indigo-600 dark:text-indigo-400 mb-1">الربط التقني الدقيق (Zero-Gap):</div>
-                <p class="whitespace-pre-line text-slate-700 dark:text-slate-200">${formatInlineCode(data.technicalBridgeAr || '')}</p>
+              <h4 class="font-bold text-base">${escapeHtml(data.analogyTitleAr || 'مثال مبسط')}</h4>
+              <p class="whitespace-pre-line leading-8">${formatInlineCode(data.simpleStoryAr || '')}</p>
+              <div class="rounded-xl bg-white dark:bg-[#1E293B] border border-[#0D9488]/30 p-4">
+                <div class="font-bold text-xs text-[#0D9488] mb-1">الربط التقني:</div>
+                <p class="whitespace-pre-line leading-8">${formatInlineCode(data.technicalBridgeAr || '')}</p>
               </div>
               <div class="rounded-xl bg-slate-950 text-emerald-300 overflow-hidden border border-slate-800">
-                <div class="px-3.5 py-2 bg-slate-900 text-[11px] font-bold text-slate-300 ltr-block">Simple Example Code</div>
                 <pre class="code-box p-4 text-xs sm:text-[13px]">${escapeHtml(data.miniCode || '')}</pre>
-                <div class="px-3.5 py-2.5 bg-slate-900/70 border-t border-slate-800 text-xs text-slate-300">
-                  ${formatInlineCode(data.miniCodeExplanationAr || '')}
-                </div>
+                <div class="px-4 py-2.5 bg-slate-900 text-xs text-slate-200">${formatInlineCode(data.miniCodeExplanationAr || '')}</div>
               </div>
             </div>
           `;
         } catch (err) {
           dom.addonLoading.classList.add('hidden');
-          dom.addonBody.innerHTML = `<p class="text-rose-600 dark:text-rose-400 font-bold">حدث خطأ أثناء تجهيز المثال المبسط: ${escapeHtml(err.message)}</p>`;
+          dom.addonBody.innerHTML = `<p class="text-rose-600 font-bold">خطأ: ${escapeHtml(err.message)}</p>`;
         }
       } else {
         const payload = {
-          systemInstruction: {
-            parts: [{ text: buildZeroGapSystemInstruction(lesson) }]
-          },
+          systemInstruction: { parts: [{ text: buildExhaustiveZeroGapInstruction(lesson) }] },
           contents: [
             {
               role: 'user',
               parts: [
                 {
-                  text: `
-أنشئ اختباراً إضافياً جديداً ومختلفاً مكوناً من 3 أسئلة اختيار من متعدد عميقة حول الدرس (${lesson.id}: ${lesson.title} — ${lesson.focus}) للتحقق من الفهم الهندسي الدقيق.
-سياق الدرس: ${existingLessonContext}
-                  `.trim()
+                  text: `أنشئ اختباراً إضافياً جديداً من 3 أسئلة اختيار من متعدد حول الدرس (${lesson.id}: ${lesson.title} — ${lesson.focus}).`
                 }
               ]
             }
@@ -1894,10 +2291,7 @@
                     type: 'OBJECT',
                     properties: {
                       questionAr: { type: 'STRING' },
-                      options: {
-                        type: 'ARRAY',
-                        items: { type: 'STRING' }
-                      },
+                      options: { type: 'ARRAY', items: { type: 'STRING' } },
                       correctIndex: { type: 'INTEGER' },
                       explanationAr: { type: 'STRING' }
                     },
@@ -1916,13 +2310,13 @@
           dom.addonLoading.classList.add('hidden');
           const quizWrapper = document.createElement('div');
           const scoreBadge = document.createElement('span');
-          scoreBadge.className = 'inline-block rounded-full bg-violet-600/10 text-violet-700 dark:text-violet-300 px-3 py-1 text-xs font-extrabold ltr-block mb-2';
+          scoreBadge.className = 'inline-block rounded-full bg-[#0D9488]/15 text-[#0D9488] px-3 py-1 text-xs font-bold ltr-block mb-2';
           dom.addonBody.appendChild(scoreBadge);
           dom.addonBody.appendChild(quizWrapper);
           renderInteractiveQuiz(data.questions || [], quizWrapper, scoreBadge);
         } catch (err) {
           dom.addonLoading.classList.add('hidden');
-          dom.addonBody.innerHTML = `<p class="text-rose-600 dark:text-rose-400 font-bold">حدث خطأ أثناء إنشاء الاختبار الإضافي: ${escapeHtml(err.message)}</p>`;
+          dom.addonBody.innerHTML = `<p class="text-rose-600 font-bold">خطأ: ${escapeHtml(err.message)}</p>`;
         }
       }
 
@@ -1932,8 +2326,375 @@
     }
 
     /**
-     * Settings Modal & Storage Actions
+     * Feature 2: Interactive Widget Generator (HTML/JS mini-simulation inside the page)
      */
+    async function generateInteractiveWidgetForLesson() {
+      const lesson = getActiveLesson();
+      if (!state.apiKey.trim()) {
+        dom.openSettingsBtn.click();
+        showToast('أدخل مفتاح Gemini API أولاً لتوليد المحاكي التفاعلي.', 'warning');
+        return;
+      }
+      if (state.isWidgetLoading) return;
+
+      state.isWidgetLoading = true;
+      dom.interactiveWidgetBtn.disabled = true;
+      dom.interactiveWidgetPanel.classList.remove('hidden');
+      dom.widgetPanelTitle.textContent = `محاكي تفاعلي للدرس ${lesson.id}: ${lesson.title}`;
+      dom.widgetLoading.classList.remove('hidden');
+      dom.widgetMountArea.innerHTML = '';
+      dom.interactiveWidgetPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      const payload = {
+        systemInstruction: {
+          parts: [
+            {
+              text: `أنت مهندس واجهات تفاعلية ومحاكيات تعليمية. صمم أداة HTML/JS صغيرة ومتكاملة داخل div واحد تحاكي مفهوم الدرس (${lesson.id}: ${lesson.title} — ${lesson.focus}) عملياً. أعد كود HTML مع <script> داخل حقل widgetHtml فقط بدون أي مكتبات خارجية.`
+            }
+          ]
+        },
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                text: `ابنِ محاكياً تفاعلياً عملياً للدرس ${lesson.id} (${lesson.title} - ${lesson.focus}) بأزرار ومؤشرات حية توضح الفكرة خطوة بخطوة.`
+              }
+            ]
+          }
+        ],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'OBJECT',
+            properties: {
+              widgetTitleAr: { type: 'STRING' },
+              howToUseAr: { type: 'STRING' },
+              widgetHtml: { type: 'STRING' }
+            },
+            required: ['widgetTitleAr', 'howToUseAr', 'widgetHtml']
+          }
+        }
+      };
+
+      try {
+        const raw = await callGeminiAPI(payload);
+        const data = JSON.parse(raw);
+        dom.widgetLoading.classList.add('hidden');
+        dom.widgetPanelTitle.textContent = data.widgetTitleAr || `محاكي ${lesson.id}`;
+        dom.widgetMountArea.innerHTML = `
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">${escapeHtml(data.howToUseAr || '')}</p>
+          <div id="liveWidgetSandbox" class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1E293B] p-4">
+            ${data.widgetHtml || ''}
+          </div>
+        `;
+        // Execute inline scripts inside liveWidgetSandbox safely
+        const sandbox = document.getElementById('liveWidgetSandbox');
+        if (sandbox) {
+          sandbox.querySelectorAll('script').forEach((oldScript) => {
+            const newScript = document.createElement('script');
+            newScript.textContent = oldScript.textContent;
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+          });
+        }
+        showToast('تم تشغيل المحاكي التفاعلي للدرس!', 'success');
+      } catch (err) {
+        dom.widgetLoading.classList.add('hidden');
+        dom.widgetMountArea.innerHTML = `<p class="text-rose-600 font-bold text-xs">تعذر توليد المحاكي: ${escapeHtml(err.message)}</p>`;
+      } finally {
+        state.isWidgetLoading = false;
+        dom.interactiveWidgetBtn.disabled = false;
+      }
+    }
+
+    /**
+     * Feature 3: Lab Reviewer (Codespaces code evaluator & persistence with lesson)
+     */
+    async function reviewLabSolution() {
+      const lesson = getActiveLesson();
+      const codeVal = (dom.labCodeInput.value || '').trim();
+      if (!codeVal) {
+        showToast('الصق كود الحل من Codespaces أولاً.', 'warning');
+        return;
+      }
+      if (!state.apiKey.trim()) {
+        dom.openSettingsBtn.click();
+        showToast('أدخل مفتاح Gemini API أولاً.', 'warning');
+        return;
+      }
+      if (state.isLabReviewing) return;
+
+      state.isLabReviewing = true;
+      dom.reviewLabBtn.disabled = true;
+      dom.labReviewResultBox.classList.remove('hidden');
+      dom.labReviewResultBox.innerHTML = `<p class="text-xs font-bold text-[#0D9488] animate-pulse-soft">جاري مراجعة وتقييم كود اللاب...</p>`;
+
+      const payload = {
+        systemInstruction: {
+          parts: [{ text: buildExhaustiveZeroGapInstruction(lesson) }]
+        },
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                text: `
+قيّم وصحّح كود الطالب الخاص بلاب الدرس (${lesson.id}: ${lesson.title} — ${lesson.focus}):
+\`\`\`
+${codeVal}
+\`\`\`
+وضح الأخطاء إن وجدت، جودة الكود، وكيف يمكن تحسينه، واكتب نسخة مصححة إن لزم.
+                `.trim()
+              }
+            ]
+          }
+        ],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'OBJECT',
+            properties: {
+              verdictAr: { type: 'STRING' },
+              feedbackAr: { type: 'STRING' },
+              improvedCode: { type: 'STRING' }
+            },
+            required: ['verdictAr', 'feedbackAr', 'improvedCode']
+          }
+        }
+      };
+
+      try {
+        const raw = await callGeminiAPI(payload);
+        const parsed = JSON.parse(raw);
+
+        if (!state.lessonsCache[lesson.id]) {
+          state.lessonsCache[lesson.id] = {
+            keyTerms: [],
+            objectives: [],
+            whyItMatters: '',
+            deepExplanationParagraphs: [],
+            examples: [],
+            quiz: []
+          };
+        }
+
+        const reviewRecord = {
+          submittedCode: codeVal,
+          verdictAr: parsed.verdictAr || '',
+          feedbackAr: parsed.feedbackAr || '',
+          improvedCode: parsed.improvedCode || '',
+          reviewedAt: new Date().toLocaleString('ar-EG')
+        };
+
+        state.lessonsCache[lesson.id].labReview = reviewRecord;
+        saveLessonsCache();
+        renderLabReviewBox(reviewRecord);
+        showToast('تم تقييم كود اللاب وحفظه مع الدرس!', 'success');
+      } catch (err) {
+        dom.labReviewResultBox.innerHTML = `<p class="text-rose-600 font-bold text-xs">تعذر مراجعة اللاب: ${escapeHtml(err.message)}</p>`;
+      } finally {
+        state.isLabReviewing = false;
+        dom.reviewLabBtn.disabled = false;
+      }
+    }
+
+    function renderLabReviewBox(review) {
+      dom.labReviewResultBox.classList.remove('hidden');
+      dom.labReviewResultBox.innerHTML = `
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <span class="rounded-lg bg-[#0D9488]/15 text-[#0D9488] px-3 py-1 text-xs font-bold">${escapeHtml(review.verdictAr || 'تقييم اللاب')}</span>
+          <span class="ltr-block text-[11px] text-slate-400">${escapeHtml(review.reviewedAt || '')}</span>
+        </div>
+        <p class="whitespace-pre-line text-sm leading-7">${formatInlineCode(review.feedbackAr || '')}</p>
+        ${
+          review.improvedCode
+            ? `<div class="rounded-xl bg-slate-950 text-emerald-300 overflow-hidden border border-slate-800">
+                 <div class="px-3 py-1.5 bg-slate-900 text-[11px] font-bold text-slate-300 ltr-block">Suggested / Corrected Code</div>
+                 <pre class="code-box p-3.5 text-xs">${escapeHtml(review.improvedCode)}</pre>
+               </div>`
+            : ''
+        }
+      `;
+    }
+
+    /**
+     * Feature 1: Render Zero-Gap Glossary ("قاموسي") with link back to lesson
+     */
+    function renderGlossaryView() {
+      const q = (state.glossaryQuery || '').trim().toLowerCase();
+      const entries = Object.values(state.glossaryMap).filter((item) => {
+        if (!q) return true;
+        return (
+          (item.termAr || '').toLowerCase().includes(q) ||
+          (item.termEn || '').toLowerCase().includes(q) ||
+          (item.definitionAr || '').toLowerCase().includes(q) ||
+          (item.lessonId || '').toLowerCase().includes(q)
+        );
+      });
+
+      if (entries.length === 0) {
+        dom.glossaryListContainer.innerHTML = `
+          <div class="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center text-xs sm:text-sm text-slate-500">
+            لا توجد مصطلحات محفوظة في قاموسك بعد. عند توليد أي درس ستُضاف مصطلحاته تلقائياً هنا.
+          </div>
+        `;
+        return;
+      }
+
+      dom.glossaryListContainer.innerHTML = entries
+        .map(
+          (item) => `
+            <div class="rounded-xl border border-slate-200 dark:border-slate-700/80 bg-[#F8F9FA] dark:bg-[#0F172A]/60 p-4 space-y-2">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-sm sm:text-base">${escapeHtml(item.termAr)}</span>
+                  ${item.termEn ? `<span class="ltr-block rounded bg-[#0D9488]/15 text-[#0D9488] px-2 py-0.5 text-xs font-semibold">${escapeHtml(item.termEn)}</span>` : ''}
+                </div>
+                <button
+                  type="button"
+                  data-jump-lesson="${escapeHtml(item.lessonId)}"
+                  class="jump-to-lesson-btn rounded-lg bg-[#0D9488] hover:bg-[#0F766E] text-white px-3 py-1 text-xs font-bold transition"
+                >
+                  الدرس <span class="ltr-block">${escapeHtml(item.lessonId)}</span> ←
+                </button>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">${escapeHtml(item.definitionAr)}</p>
+            </div>
+          `
+        )
+        .join('');
+
+      dom.glossaryListContainer.querySelectorAll('.jump-to-lesson-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.dataset.jumpLesson;
+          setActiveView('lesson');
+          selectLesson(targetId, { autoGenerateIfMissing: true });
+        });
+      });
+    }
+
+    /**
+     * Feature 4: Flashcards mode from COMPLETED lessons only
+     */
+    function buildCompletedFlashcardPool() {
+      const pool = [];
+      state.completedIds.forEach((lessonId) => {
+        const lessonMeta = ALL_LESSONS.find((l) => l.id === lessonId);
+        const cached = state.lessonsCache[lessonId];
+        if (!lessonMeta) return;
+
+        if (cached && Array.isArray(cached.keyTerms)) {
+          cached.keyTerms.forEach((t) => {
+            pool.push({
+              type: 'مصطلح',
+              lessonId: lessonMeta.id,
+              lessonTitle: lessonMeta.title,
+              front: `${t.termAr}${t.termEn ? ` (${t.termEn})` : ''}`,
+              back: t.definitionAr
+            });
+          });
+        }
+
+        if (cached && Array.isArray(cached.quiz)) {
+          cached.quiz.forEach((q) => {
+            const correctAns = (q.options && q.options[q.correctIndex]) || '';
+            pool.push({
+              type: 'سؤال كويز',
+              lessonId: lessonMeta.id,
+              lessonTitle: lessonMeta.title,
+              front: q.questionAr,
+              back: `الإجابة: ${correctAns}\n\n${q.explanationAr || ''}`
+            });
+          });
+        }
+
+        // Always include lesson focus card even if not yet cached
+        pool.push({
+          type: 'محور الدرس',
+          lessonId: lessonMeta.id,
+          lessonTitle: lessonMeta.title,
+          front: `ما الفكرة الجوهرية في الدرس ${lessonMeta.id}: ${lessonMeta.title}؟`,
+          back: lessonMeta.focus
+        });
+      });
+      return pool;
+    }
+
+    function pickNextFlashcard() {
+      const pool = buildCompletedFlashcardPool();
+      if (pool.length === 0) {
+        dom.flashcardStage.innerHTML = `
+          <div class="text-center py-8 space-y-2">
+            <div class="text-2xl">🃏</div>
+            <p class="text-sm font-bold">لا توجد بطاقات متاحة بعد</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+              يعتمد وضع Flashcards على الدروس المكتملة فقط. اضغط «تم الإنجاز» على أي درس لتفعيل بطاقاته هنا.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      const randomCard = pool[Math.floor(Math.random() * pool.length)];
+      state.currentFlashcard = randomCard;
+
+      dom.flashcardStage.innerHTML = `
+        <div class="space-y-3">
+          <div class="flex items-center justify-between gap-2 text-xs">
+            <span class="rounded-lg bg-[#0D9488]/15 text-[#0D9488] px-2.5 py-1 font-bold">${escapeHtml(randomCard.type)}</span>
+            <span class="ltr-block font-bold text-slate-500">${escapeHtml(randomCard.lessonId)} • ${pool.length} Cards</span>
+          </div>
+          <div class="text-base sm:text-lg font-bold leading-relaxed pt-2">${formatInlineCode(randomCard.front)}</div>
+        </div>
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-700 space-y-3">
+          <div id="flashcardAnswerBox" class="hidden rounded-xl bg-white dark:bg-[#1E293B] border border-[#0D9488]/30 p-4 text-sm whitespace-pre-line leading-7">
+            ${formatInlineCode(randomCard.back)}
+          </div>
+          <button id="revealFlashcardAnswerBtn" type="button" class="w-full rounded-xl border border-[#0D9488] text-[#0D9488] hover:bg-[#0D9488]/10 py-2.5 text-xs sm:text-sm font-bold transition">
+            إظهار الإجابة
+          </button>
+        </div>
+      `;
+
+      const revealBtn = document.getElementById('revealFlashcardAnswerBtn');
+      const ansBox = document.getElementById('flashcardAnswerBox');
+      if (revealBtn && ansBox) {
+        revealBtn.addEventListener('click', () => {
+          ansBox.classList.toggle('hidden');
+          revealBtn.textContent = ansBox.classList.contains('hidden') ? 'إظهار الإجابة' : 'إخفاء الإجابة';
+        });
+      }
+    }
+
+    /**
+     * Text selection listener inside rendered lesson for floating "❓ مش فاهم — اشرح باسترسال"
+     */
+    function handleTextSelection() {
+      const sel = window.getSelection();
+      const selectedText = sel ? sel.toString().trim() : '';
+
+      if (!selectedText || selectedText.length < 3 || !dom.renderedLessonContent.contains(sel.anchorNode)) {
+        dom.floatingDontUnderstandBtn.classList.add('hidden');
+        state.selectedTextForHelp = '';
+        return;
+      }
+
+      const range = sel.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      if (!rect || (rect.width === 0 && rect.height === 0)) {
+        dom.floatingDontUnderstandBtn.classList.add('hidden');
+        return;
+      }
+
+      state.selectedTextForHelp = selectedText;
+      const topPos = Math.max(64, rect.top + window.scrollY - 46);
+      const leftPos = Math.min(window.innerWidth - 220, Math.max(12, rect.left + window.scrollX));
+
+      dom.floatingDontUnderstandBtn.style.top = `${topPos}px`;
+      dom.floatingDontUnderstandBtn.style.left = `${leftPos}px`;
+      dom.floatingDontUnderstandBtn.classList.remove('hidden');
+    }
+
     function openSettingsModal() {
       dom.apiKeyInput.value = state.apiKey;
       dom.apiKeyInput.type = 'password';
@@ -1951,6 +2712,21 @@
 
     function bindEvents() {
       dom.themeToggleBtn.addEventListener('click', toggleTheme);
+      dom.focusModeBtn.addEventListener('click', toggleFocusMode);
+
+      dom.viewLessonTabBtn.addEventListener('click', () => setActiveView('lesson'));
+      dom.viewGlossaryTabBtn.addEventListener('click', () => setActiveView('glossary'));
+      dom.viewFlashcardsTabBtn.addEventListener('click', () => setActiveView('flashcards'));
+
+      dom.fontDecreaseBtn.addEventListener('click', () => {
+        state.readerFontSize = Math.max(15, state.readerFontSize - 1);
+        applyReaderFontSize();
+      });
+
+      dom.fontIncreaseBtn.addEventListener('click', () => {
+        state.readerFontSize = Math.min(23, state.readerFontSize + 1);
+        applyReaderFontSize();
+      });
 
       dom.mobileSidebarBtn.addEventListener('click', openMobileSidebar);
       dom.sidebarBackdrop.addEventListener('click', closeMobileSidebar);
@@ -1983,11 +2759,10 @@
         localStorage.setItem(STORAGE_KEYS.API_KEY, trimmed);
         updateApiStatusUI();
         closeSettingsModal();
-        showToast('تم حفظ إعدادات Gemini API بنجاح.', 'success');
+        showToast('تم حفظ مفتاح Gemini API بنجاح.', 'success');
 
-        // Auto-generate current lesson if not yet cached and key is now available
         const current = getActiveLesson();
-        if (trimmed && !state.lessonsCache[current.id]) {
+        if (trimmed && !state.lessonsCache[current.id] && state.activeView === 'lesson') {
           await generateAndCacheLesson(current);
         }
       });
@@ -1997,18 +2772,19 @@
           exportedAt: new Date().toISOString(),
           totalLessons: ALL_LESSONS.length,
           completedLessons: [...state.completedIds],
-          generatedLessons: state.lessonsCache
+          generatedLessons: state.lessonsCache,
+          glossary: state.glossaryMap
         };
         const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `zero-gap-cs-progress-${new Date().toISOString().slice(0, 10)}.json`;
+        a.download = `zero-gap-cs-backup-${new Date().toISOString().slice(0, 10)}.json`;
         document.body.appendChild(a);
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
-        showToast('تم تصدير نسخة JSON من تقدمك ودروسك.', 'success');
+        showToast('تم تصدير نسخة JSON.', 'success');
       });
 
       dom.clearCacheBtn.addEventListener('click', () => {
@@ -2017,85 +2793,111 @@
         updateStorageStats();
         renderSidebarTree();
         selectLesson(state.activeLessonId, { autoGenerateIfMissing: false });
-        showToast('تم مسح الدروس المولّدة المحفوظة محلياً.', 'info');
+        showToast('تم مسح الدروس المولّدة المحفوظة.', 'info');
       });
 
-      dom.resetAllBtn.addEventListener('click', () => {
-        dom.confirmResetBar.classList.remove('hidden');
-      });
-
-      dom.confirmResetNo.addEventListener('click', () => {
-        dom.confirmResetBar.classList.add('hidden');
-      });
+      dom.resetAllBtn.addEventListener('click', () => dom.confirmResetBar.classList.remove('hidden'));
+      dom.confirmResetNo.addEventListener('click', () => dom.confirmResetBar.classList.add('hidden'));
 
       dom.confirmResetYes.addEventListener('click', () => {
         state.completedIds.clear();
         state.lessonsCache = {};
+        state.glossaryMap = {};
         saveCompletedLessons();
         localStorage.removeItem(STORAGE_KEYS.LESSONS_CACHE);
+        localStorage.removeItem(STORAGE_KEYS.GLOSSARY);
         updateProgressUI();
         updateStorageStats();
+        updateGlossaryBadge();
         renderSidebarTree();
         selectLesson(state.activeLessonId, { autoGenerateIfMissing: false });
         dom.confirmResetBar.classList.add('hidden');
         closeSettingsModal();
-        showToast('تم تصفير التقدم والدروس المحفوظة بالكامل.', 'info');
-      });
-
-      dom.lessonCompletedCheckbox.addEventListener('change', (e) => {
-        const lesson = getActiveLesson();
-        if (e.target.checked) {
-          state.completedIds.add(lesson.id);
-          showToast(`تم تسجيل ${lesson.id} كمكتمل ✓`, 'success');
-        } else {
-          state.completedIds.delete(lesson.id);
-          showToast(`تم إلغاء إكمال ${lesson.id}`, 'info');
-        }
-        saveCompletedLessons();
-        updateProgressUI();
-        renderLessonHeader(lesson);
-        renderSidebarTree();
+        showToast('تم تصفير التقدم والبيانات بالكامل.', 'info');
       });
 
       dom.generateLessonBtn.addEventListener('click', () => {
-        const lesson = getActiveLesson();
-        generateAndCacheLesson(lesson);
+        setActiveView('lesson');
+        generateAndCacheLesson(getActiveLesson());
       });
 
       dom.simplerExampleBtn.addEventListener('click', () => runLessonAddon('simpler'));
       dom.extraQuizBtn.addEventListener('click', () => runLessonAddon('extra_quiz'));
+      dom.interactiveWidgetBtn.addEventListener('click', generateInteractiveWidgetForLesson);
+
+      dom.closeWidgetBtn.addEventListener('click', () => {
+        dom.interactiveWidgetPanel.classList.add('hidden');
+        dom.widgetMountArea.innerHTML = '';
+      });
 
       dom.closeAddonBtn.addEventListener('click', () => {
         dom.dynamicAddonPanel.classList.add('hidden');
         dom.addonBody.innerHTML = '';
       });
 
+      dom.submitConfusionBtn.addEventListener('click', () => {
+        runDontUnderstandExpansion(dom.customConfusionInput.value, 'box');
+      });
+
+      dom.floatingDontUnderstandBtn.addEventListener('click', () => {
+        const text = state.selectedTextForHelp;
+        dom.floatingDontUnderstandBtn.classList.add('hidden');
+        runDontUnderstandExpansion(text, 'selection');
+      });
+
+      document.addEventListener('mouseup', () => setTimeout(handleTextSelection, 10));
+      document.addEventListener('touchend', () => setTimeout(handleTextSelection, 80));
+
+      dom.reviewLabBtn.addEventListener('click', reviewLabSolution);
+
+      dom.glossarySearchInput.addEventListener('input', (e) => {
+        state.glossaryQuery = e.target.value || '';
+        renderGlossaryView();
+      });
+
+      dom.nextFlashcardBtn.addEventListener('click', pickNextFlashcard);
+
+      // Bottom Fixed Navigation Bar
       dom.prevLessonBtn.addEventListener('click', () => {
+        setActiveView('lesson');
         const current = getActiveLesson();
         if (current.globalIndex > 0) {
-          const prev = ALL_LESSONS[current.globalIndex - 1];
-          selectLesson(prev.id, { autoGenerateIfMissing: true });
+          selectLesson(ALL_LESSONS[current.globalIndex - 1].id, { autoGenerateIfMissing: true });
         }
       });
 
       dom.nextLessonBtn.addEventListener('click', () => {
+        setActiveView('lesson');
         const current = getActiveLesson();
         if (current.globalIndex < ALL_LESSONS.length - 1) {
-          const next = ALL_LESSONS[current.globalIndex + 1];
-          selectLesson(next.id, { autoGenerateIfMissing: true });
+          selectLesson(ALL_LESSONS[current.globalIndex + 1].id, { autoGenerateIfMissing: true });
         }
+      });
+
+      dom.bottomCompleteBtn.addEventListener('click', () => {
+        const lesson = getActiveLesson();
+        if (state.completedIds.has(lesson.id)) {
+          state.completedIds.delete(lesson.id);
+          showToast(`تم إلغاء إكمال ${lesson.id}`, 'info');
+        } else {
+          state.completedIds.add(lesson.id);
+          showToast(`تم تسجيل ${lesson.id} كمكتمل ✓`, 'success');
+        }
+        saveCompletedLessons();
+        updateProgressUI();
+        updateBottomBar(lesson);
+        renderSidebarTree();
       });
     }
 
-    /**
-     * Application Bootstrap
-     */
     window.addEventListener('DOMContentLoaded', async () => {
       initTheme();
+      applyReaderFontSize();
       bindEvents();
       updateApiStatusUI();
       updateProgressUI();
       updateStorageStats();
+      updateGlossaryBadge();
       renderSidebarTree();
       await selectLesson(state.activeLessonId, { autoGenerateIfMissing: true });
     });
