@@ -116,19 +116,19 @@
 
   <!-- Settings Modal -->
   <div id="settingsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
-    <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+    <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 shrink-0">
         <div class="flex items-center gap-2.5">
           <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#0D9488]/15 text-[#0D9488] font-bold">⚙</span>
           <div>
-            <h2 class="text-base font-bold">إعدادات المنصة و Gemini API</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400">يتم حفظ المفتاح والتقدم والقاموس والبيانات محلياً في localStorage</p>
+            <h2 class="text-base font-bold">إعدادات المنصة و Gemini API و GitHub Sync</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">حفظ محلي في localStorage + مزامنة تلقائية مع GitHub</p>
           </div>
         </div>
         <button id="closeSettingsBtn" type="button" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">✕</button>
       </div>
 
-      <div class="p-6 space-y-5">
+      <div class="p-6 space-y-5 overflow-y-auto">
         <div>
           <label for="apiKeyInput" class="block text-sm font-semibold mb-1.5">مفتاح Gemini API Key</label>
           <div class="relative flex items-center gap-2">
@@ -145,6 +145,34 @@
           </div>
           <p class="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
             يُستخدم <span class="ltr-block font-semibold text-[#0D9488]">gemini-3-flash-preview</span> بحد أقصى <span class="ltr-block font-semibold">maxOutputTokens: 65536</span> للشرح المسترسل الكامل دون اختصار.
+          </p>
+        </div>
+
+        <!-- GitHub Auto-Sync Token Field -->
+        <div class="rounded-xl border border-[#0D9488]/30 bg-[#0D9488]/5 p-4 space-y-2.5">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <label for="ghTokenInput" class="block text-sm font-bold text-[#0F766E] dark:text-[#5EEAD4]">
+              مفتاح المزامنة التلقائية (GitHub Token)
+            </label>
+            <span class="ltr-block text-[11px] text-slate-500 dark:text-slate-400">Messous94/CS-Bachelors-Journey (progress.json)</span>
+          </div>
+          <div class="relative flex items-center gap-2">
+            <input
+              id="ghTokenInput"
+              type="password"
+              dir="ltr"
+              placeholder="github_pat_..."
+              class="ltr-block w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-[#0F172A] px-3.5 py-2.5 text-sm focus:border-[#0D9488] focus:outline-none focus:ring-2 focus:ring-[#0D9488]/20"
+            />
+            <button id="toggleGhTokenVisBtn" type="button" class="rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-[#1E293B] px-3 py-2.5 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition shrink-0">
+              إظهار
+            </button>
+            <button id="syncNowBtn" type="button" class="rounded-xl bg-[#0D9488] hover:bg-[#0F766E] text-white px-3.5 py-2.5 text-xs font-bold transition shrink-0 whitespace-nowrap">
+              مزامنة الآن ↻
+            </button>
+          </div>
+          <p id="ghSyncStatusLabel" class="text-xs text-slate-600 dark:text-slate-300 font-semibold leading-relaxed">
+            حالة المزامنة: في انتظار إدخال GitHub Token للمزامنة مع progress.json.
           </p>
         </div>
 
@@ -174,7 +202,7 @@
         </div>
       </div>
 
-      <div class="flex items-center justify-end gap-2 px-6 py-4 border-t border-slate-200 dark:border-slate-700">
+      <div class="flex items-center justify-end gap-2 px-6 py-4 border-t border-slate-200 dark:border-slate-700 shrink-0">
         <button id="cancelSettingsBtn" type="button" class="rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800 transition">إلغاء</button>
         <button id="saveSettingsBtn" type="button" class="rounded-xl bg-[#0D9488] hover:bg-[#0F766E] text-white px-5 py-2 text-sm font-bold shadow-sm transition">حفظ الإعدادات</button>
       </div>
@@ -356,7 +384,7 @@
                   <div class="text-3xl">📘</div>
                   <h3 class="text-base font-bold">هذا الدرس لم يُولَّد بعد على جهازك</h3>
                   <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
-                    اضغط على <span class="font-bold text-[#0D9488]">«توليد الدرس المسترسل»</span> لتوليد شرح مفصل كامل وحفظه تلقائياً في <span class="ltr-block">localStorage</span>.
+                    اضغط على <span class="font-bold text-[#0D9488]">«توليد الدرس المسترسل»</span> لتوليد شرح مفصل كامل وحفظه تلقائياً في <span class="ltr-block">localStorage</span> ومزامنته مع <span class="ltr-block">GitHub</span>.
                   </p>
                 </div>
 
@@ -465,7 +493,7 @@
                     </h3>
                   </div>
                   <p class="text-xs text-slate-500 dark:text-slate-400">
-                    اكتب النقطة أو السطر أو الفكرة اللي محتاجة تفكيك أكتر؛ هيتم توليد شرح طويل ومفصل بتشبيهات من الواقع وأمثلة خطوة بخطوة وإلحاقه بالدرس وحفظه في <span class="ltr-block">localStorage</span>.
+                    اكتب النقطة أو السطر أو الفكرة اللي محتاجة تفكيك أكتر؛ هيتم توليد شرح طويل ومفصل بتشبيهات من الواقع وأمثلة خطوة بخطوة وإلحاقه بالدرس وحفظه في <span class="ltr-block">localStorage</span> ومزامنته مع <span class="ltr-block">GitHub</span>.
                   </p>
                   <textarea
                     id="customConfusionInput"
@@ -577,14 +605,16 @@
   <script>
     /**
      * =========================================================================
-     * ZERO-GAP CS BACHELOR'S PLATFORM — ENHANCED EDITION
+     * ZERO-GAP CS BACHELOR'S PLATFORM — ENHANCED + GITHUB AUTO-SYNC EDITION
      * Preserves exact localStorage keys:
      * - zgcs_gemini_api_key_v1
      * - zgcs_completed_lessons_v1
      * - zgcs_generated_lessons_v1
      * - zgcs_active_lesson_id_v1
      * - zgcs_theme_mode_v1
-     * Plus glossary & flashcards persistence in localStorage.
+     * - zgcs_glossary_terms_v1
+     * Plus GitHub Auto-Sync token key:
+     * - zg_cs_gh_token
      * =========================================================================
      */
 
@@ -594,7 +624,15 @@
       LESSONS_CACHE: 'zgcs_generated_lessons_v1',
       ACTIVE_LESSON: 'zgcs_active_lesson_id_v1',
       THEME: 'zgcs_theme_mode_v1',
-      GLOSSARY: 'zgcs_glossary_terms_v1'
+      GLOSSARY: 'zgcs_glossary_terms_v1',
+      GH_TOKEN: 'zg_cs_gh_token'
+    };
+
+    const GITHUB_CONFIG = {
+      owner: 'Messous94',
+      repo: 'CS-Bachelors-Journey',
+      branch: 'main',
+      path: 'progress.json'
     };
 
     const GEMINI_MODEL = 'gemini-3-flash-preview';
@@ -1053,6 +1091,7 @@
 
     const state = {
       apiKey: localStorage.getItem(STORAGE_KEYS.API_KEY) || '',
+      ghToken: localStorage.getItem(STORAGE_KEYS.GH_TOKEN) || '',
       completedIds: new Set(JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED) || '[]')),
       lessonsCache: JSON.parse(localStorage.getItem(STORAGE_KEYS.LESSONS_CACHE) || '{}'),
       glossaryMap: JSON.parse(localStorage.getItem(STORAGE_KEYS.GLOSSARY) || '{}'),
@@ -1066,6 +1105,9 @@
       isAddonLoading: false,
       isWidgetLoading: false,
       isLabReviewing: false,
+      isSyncing: false,
+      remoteFileSha: null,
+      ghPushTimer: null,
       selectedTextForHelp: '',
       currentFlashcard: null,
       expandedCourses: new Set(['HW101']),
@@ -1087,6 +1129,10 @@
       saveSettingsBtn: document.getElementById('saveSettingsBtn'),
       apiKeyInput: document.getElementById('apiKeyInput'),
       toggleApiKeyVisBtn: document.getElementById('toggleApiKeyVisBtn'),
+      ghTokenInput: document.getElementById('ghTokenInput'),
+      toggleGhTokenVisBtn: document.getElementById('toggleGhTokenVisBtn'),
+      syncNowBtn: document.getElementById('syncNowBtn'),
+      ghSyncStatusLabel: document.getElementById('ghSyncStatusLabel'),
       apiStatusDot: document.getElementById('apiStatusDot'),
       missingApiBanner: document.getElementById('missingApiBanner'),
       storageStatsLabel: document.getElementById('storageStatsLabel'),
@@ -1189,6 +1235,327 @@
       }, 3400);
     }
 
+    function setGhSyncStatus(text) {
+      if (dom.ghSyncStatusLabel) {
+        dom.ghSyncStatusLabel.textContent = text;
+      }
+    }
+
+    // =========================================================================
+    // UTF-8 SAFE BASE64 HELPERS (Arabic + Emoji + Code)
+    // =========================================================================
+    function encodeUtf8ToBase64(str) {
+      const bytes = new TextEncoder().encode(str);
+      let bin = '';
+      const chunkSize = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        const sub = bytes.subarray(i, i + chunkSize);
+        bin += String.fromCharCode.apply(null, sub);
+      }
+      return btoa(bin);
+    }
+
+    function decodeBase64ToUtf8(b64) {
+      const cleanB64 = String(b64 || '').replace(/\s+/g, '');
+      const bin = atob(cleanB64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) {
+        bytes[i] = bin.charCodeAt(i);
+      }
+      return new TextDecoder().decode(bytes);
+    }
+
+    // =========================================================================
+    // GITHUB AUTO-SYNC ENGINE (GET & PUT /repos/Messous94/CS-Bachelors-Journey/contents/progress.json)
+    // =========================================================================
+    function getGitHubContentsUrl(cacheBust = false) {
+      const base = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
+      const params = new URLSearchParams();
+      params.set('ref', GITHUB_CONFIG.branch);
+      if (cacheBust) {
+        params.set('t', String(Date.now()));
+      }
+      return `${base}?${params.toString()}`;
+    }
+
+    function getGitHubHeaders() {
+      const token = (state.ghToken || '').trim();
+      return {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+        'X-GitHub-Api-Version': '2022-11-28'
+      };
+    }
+
+    function buildSyncSnapshotObject() {
+      return {
+        updatedAt: new Date().toISOString(),
+        completedIds: [...state.completedIds],
+        lessonsCache: state.lessonsCache,
+        glossaryMap: state.glossaryMap
+      };
+    }
+
+    /**
+     * Merges remote progress.json payload with local state without losing local data
+     */
+    function mergeRemoteProgressPayload(remoteObj) {
+      if (!remoteObj || typeof remoteObj !== 'object') return false;
+      let changed = false;
+
+      if (Array.isArray(remoteObj.completedIds)) {
+        remoteObj.completedIds.forEach((id) => {
+          if (typeof id === 'string' && !state.completedIds.has(id)) {
+            state.completedIds.add(id);
+            changed = true;
+          }
+        });
+      }
+
+      if (remoteObj.lessonsCache && typeof remoteObj.lessonsCache === 'object') {
+        Object.entries(remoteObj.lessonsCache).forEach(([lessonId, remoteLesson]) => {
+          if (!remoteLesson || typeof remoteLesson !== 'object') return;
+          const localLesson = state.lessonsCache[lessonId];
+
+          if (!localLesson) {
+            state.lessonsCache[lessonId] = remoteLesson;
+            changed = true;
+          } else {
+            // Merge customExplanations without duplicating identical entries
+            const localExp = Array.isArray(localLesson.customExplanations) ? localLesson.customExplanations : [];
+            const remoteExp = Array.isArray(remoteLesson.customExplanations) ? remoteLesson.customExplanations : [];
+            const seenExp = new Set(localExp.map((e) => `${e.query || ''}|${e.createdAt || ''}`));
+            const mergedExp = [...localExp];
+            remoteExp.forEach((e) => {
+              const key = `${e.query || ''}|${e.createdAt || ''}`;
+              if (!seenExp.has(key)) {
+                seenExp.add(key);
+                mergedExp.push(e);
+                changed = true;
+              }
+            });
+            if (mergedExp.length > 0) {
+              localLesson.customExplanations = mergedExp;
+            }
+
+            // Keep labReview if remote has one and local doesn't, or remote is newer
+            if (remoteLesson.labReview && !localLesson.labReview) {
+              localLesson.labReview = remoteLesson.labReview;
+              changed = true;
+            }
+
+            // If local lesson wasn't generated yet but remote has content, adopt remote
+            const localHasBody = Array.isArray(localLesson.deepExplanationParagraphs) && localLesson.deepExplanationParagraphs.length > 0;
+            const remoteHasBody = Array.isArray(remoteLesson.deepExplanationParagraphs) && remoteLesson.deepExplanationParagraphs.length > 0;
+            if (!localHasBody && remoteHasBody) {
+              state.lessonsCache[lessonId] = {
+                ...remoteLesson,
+                customExplanations: mergedExp,
+                labReview: localLesson.labReview || remoteLesson.labReview || null
+              };
+              changed = true;
+            }
+          }
+        });
+      }
+
+      if (remoteObj.glossaryMap && typeof remoteObj.glossaryMap === 'object') {
+        Object.entries(remoteObj.glossaryMap).forEach(([key, termObj]) => {
+          if (termObj && typeof termObj === 'object' && !state.glossaryMap[key]) {
+            state.glossaryMap[key] = termObj;
+            changed = true;
+          }
+        });
+      }
+
+      if (changed) {
+        localStorage.setItem(STORAGE_KEYS.COMPLETED, JSON.stringify([...state.completedIds]));
+        try {
+          localStorage.setItem(STORAGE_KEYS.LESSONS_CACHE, JSON.stringify(state.lessonsCache));
+        } catch (e) {
+          // Ignore quota warnings
+        }
+        try {
+          localStorage.setItem(STORAGE_KEYS.GLOSSARY, JSON.stringify(state.glossaryMap));
+        } catch (e) {
+          // Ignore quota warnings
+        }
+      }
+
+      return changed;
+    }
+
+    function refreshAllViewsAfterSync() {
+      updateProgressUI();
+      updateStorageStats();
+      updateGlossaryBadge();
+      renderSidebarTree();
+
+      if (state.activeView === 'glossary') {
+        renderGlossaryView();
+      } else if (state.activeView === 'flashcards') {
+        pickNextFlashcard();
+      } else if (state.activeView === 'lesson') {
+        const current = getActiveLesson();
+        updateBottomBar(current);
+        const cachedData = state.lessonsCache[current.id];
+        if (cachedData) {
+          dom.cachedBadge.classList.remove('hidden');
+          dom.generateLessonBtnText.textContent = 'إعادة توليد الدرس المسترسل';
+          hideAllLessonStates();
+          dom.renderedLessonContent.classList.remove('hidden');
+          renderStructuredLesson(current, cachedData);
+        }
+      }
+    }
+
+    /**
+     * Pulls progress.json from GitHub and merges with local state.
+     * Handles 404 gracefully so file can be created on first push.
+     */
+    async function pullFromGitHub(silent = false) {
+      const token = (state.ghToken || '').trim();
+      if (!token) {
+        setGhSyncStatus('حالة المزامنة: لم يتم إدخال GitHub Token.');
+        return false;
+      }
+
+      if (state.isSyncing) return false;
+      state.isSyncing = true;
+      setGhSyncStatus('جاري سحب التقدم والبيانات من GitHub (progress.json)...');
+
+      try {
+        const res = await fetch(getGitHubContentsUrl(true), {
+          method: 'GET',
+          headers: getGitHubHeaders()
+        });
+
+        if (res.status === 404) {
+          state.remoteFileSha = null;
+          setGhSyncStatus('ملف progress.json غير موجود بعد على GitHub؛ سيتم إنشاؤه تلقائياً عند أول حفظ.');
+          if (!silent) showToast('لا يوجد ملف progress.json بعد؛ سيتم إنشاؤه عند أول تعديل.', 'info');
+          return false;
+        }
+
+        if (!res.ok) {
+          const errTxt = await res.text().catch(() => '');
+          throw new Error(`GitHub GET ${res.status}: ${errTxt.slice(0, 140)}`);
+        }
+
+        const fileJson = await res.json();
+        state.remoteFileSha = fileJson.sha || null;
+
+        if (fileJson.content) {
+          const decodedStr = decodeBase64ToUtf8(fileJson.content);
+          const parsedRemote = JSON.parse(decodedStr);
+          const merged = mergeRemoteProgressPayload(parsedRemote);
+          refreshAllViewsAfterSync();
+          const timeLabel = new Date().toLocaleTimeString('ar-EG');
+          setGhSyncStatus(`تمت المزامنة والسحب بنجاح (${timeLabel}) • SHA محدث.`);
+          if (!silent) {
+            showToast(merged ? 'تم سحب ودمج التحديثات من GitHub!' : 'بياناتك متطابقة مع GitHub بالفعل.', 'success');
+          }
+          return true;
+        }
+
+        setGhSyncStatus('تم الاتصال بـ GitHub (ملف فارغ).');
+        return false;
+      } catch (err) {
+        setGhSyncStatus(`تعذر السحب من GitHub: ${err.message}`);
+        if (!silent) {
+          showToast(`فشل السحب من GitHub: ${err.message}`, 'error');
+        }
+        return false;
+      } finally {
+        state.isSyncing = false;
+      }
+    }
+
+    /**
+     * Fetches latest SHA before PUT to avoid 409 Conflict, then pushes formatted JSON
+     */
+    async function pushToGitHub(silent = true) {
+      const token = (state.ghToken || '').trim();
+      if (!token) {
+        return false;
+      }
+
+      try {
+        setGhSyncStatus('جاري رفع التحديثات تلقائياً إلى GitHub...');
+
+        // Always fetch latest sha right before PUT to prevent 409 Conflict
+        const headRes = await fetch(getGitHubContentsUrl(true), {
+          method: 'GET',
+          headers: getGitHubHeaders()
+        });
+
+        if (headRes.ok) {
+          const headJson = await headRes.json();
+          state.remoteFileSha = headJson.sha || state.remoteFileSha;
+        } else if (headRes.status === 404) {
+          state.remoteFileSha = null;
+        }
+
+        const snapshot = buildSyncSnapshotObject();
+        const prettyJson = JSON.stringify(snapshot, null, 2);
+        const base64Content = encodeUtf8ToBase64(prettyJson);
+
+        const putBody = {
+          message: `Auto-sync progress (${new Date().toISOString()})`,
+          content: base64Content,
+          branch: GITHUB_CONFIG.branch
+        };
+
+        if (state.remoteFileSha) {
+          putBody.sha = state.remoteFileSha;
+        }
+
+        const putRes = await fetch(getGitHubContentsUrl(false), {
+          method: 'PUT',
+          headers: getGitHubHeaders(),
+          body: JSON.stringify(putBody)
+        });
+
+        if (!putRes.ok) {
+          const errTxt = await putRes.text().catch(() => '');
+          throw new Error(`GitHub PUT ${putRes.status}: ${errTxt.slice(0, 140)}`);
+        }
+
+        const putResult = await putRes.json();
+        if (putResult?.content?.sha) {
+          state.remoteFileSha = putResult.content.sha;
+        }
+
+        const timeLabel = new Date().toLocaleTimeString('ar-EG');
+        setGhSyncStatus(`تم الحفظ والمزامنة مع GitHub بنجاح (${timeLabel}).`);
+        if (!silent) {
+          showToast('تمت مزامنة التقدم والبيانات مع GitHub بنجاح!', 'success');
+        }
+        return true;
+      } catch (err) {
+        setGhSyncStatus(`فشل الرفع إلى GitHub: ${err.message}`);
+        if (!silent) {
+          showToast(`فشل الرفع إلى GitHub: ${err.message}`, 'error');
+        }
+        return false;
+      }
+    }
+
+    /**
+     * Debounced background push (1.5s delay) to batch rapid updates
+     */
+    function schedulePushToGitHub(delayMs = 1500) {
+      if (!(state.ghToken || '').trim()) return;
+      if (state.ghPushTimer) {
+        clearTimeout(state.ghPushTimer);
+      }
+      state.ghPushTimer = setTimeout(() => {
+        state.ghPushTimer = null;
+        pushToGitHub(true);
+      }, delayMs);
+    }
+
     function initTheme() {
       const saved = localStorage.getItem(STORAGE_KEYS.THEME);
       const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -1205,6 +1572,7 @@
 
     function saveCompletedLessons() {
       localStorage.setItem(STORAGE_KEYS.COMPLETED, JSON.stringify([...state.completedIds]));
+      schedulePushToGitHub(1500);
     }
 
     function saveLessonsCache() {
@@ -1214,15 +1582,17 @@
         showToast('تنبيه: مساحة localStorage ممتلئة جزئياً، صدّر نسخة JSON.', 'warning');
       }
       updateStorageStats();
+      schedulePushToGitHub(1500);
     }
 
-    function saveGlossaryMap() {
+    function saveGlossary() {
       try {
         localStorage.setItem(STORAGE_KEYS.GLOSSARY, JSON.stringify(state.glossaryMap));
       } catch (err) {
         // Ignore quota warnings
       }
       updateGlossaryBadge();
+      schedulePushToGitHub(1500);
     }
 
     function updateStorageStats() {
@@ -1550,18 +1920,20 @@
       terms.forEach((t) => {
         const key = `${(t.termEn || '').trim().toLowerCase()}|${(t.termAr || '').trim()}`;
         if (!key.replace(/\|/g, '')) return;
-        state.glossaryMap[key] = {
-          termAr: t.termAr || '',
-          termEn: t.termEn || '',
-          definitionAr: t.definitionAr || '',
-          lessonId: lesson.id,
-          lessonTitle: lesson.title,
-          courseCode: lesson.courseCode
-        };
-        addedOrUpdated = true;
+        if (!state.glossaryMap[key]) {
+          state.glossaryMap[key] = {
+            termAr: t.termAr || '',
+            termEn: t.termEn || '',
+            definitionAr: t.definitionAr || '',
+            lessonId: lesson.id,
+            lessonTitle: lesson.title,
+            courseCode: lesson.courseCode
+          };
+          addedOrUpdated = true;
+        }
       });
       if (addedOrUpdated) {
-        saveGlossaryMap();
+        saveGlossary();
       }
     }
 
@@ -2168,7 +2540,7 @@
                 ? `<pre class="code-box rounded-xl bg-slate-950 text-emerald-300 p-4 text-xs sm:text-[13px]">${escapeHtml(entry.stepByStepCode)}</pre>`
                 : ''
             }
-            <p class="text-xs text-[#0D9488] font-bold">✓ تم إلحاق هذا الشرح وحفظه داخل الدرس في localStorage.</p>
+            <p class="text-xs text-[#0D9488] font-bold">✓ تم إلحاق هذا الشرح وحفظه داخل الدرس في localStorage ومزامنته مع GitHub.</p>
           </div>
         `;
 
@@ -2388,7 +2760,6 @@
             ${data.widgetHtml || ''}
           </div>
         `;
-        // Execute inline scripts inside liveWidgetSandbox safely
         const sandbox = document.getElementById('liveWidgetSandbox');
         if (sandbox) {
           sandbox.querySelectorAll('script').forEach((oldScript) => {
@@ -2608,7 +2979,6 @@ ${codeVal}
           });
         }
 
-        // Always include lesson focus card even if not yet cached
         pool.push({
           type: 'محور الدرس',
           lessonId: lessonMeta.id,
@@ -2699,6 +3069,11 @@ ${codeVal}
       dom.apiKeyInput.value = state.apiKey;
       dom.apiKeyInput.type = 'password';
       dom.toggleApiKeyVisBtn.textContent = 'إظهار';
+
+      dom.ghTokenInput.value = state.ghToken;
+      dom.ghTokenInput.type = 'password';
+      dom.toggleGhTokenVisBtn.textContent = 'إظهار';
+
       dom.confirmResetBar.classList.add('hidden');
       updateStorageStats();
       dom.settingsModal.classList.remove('hidden');
@@ -2753,16 +3128,47 @@ ${codeVal}
         dom.toggleApiKeyVisBtn.textContent = isPass ? 'إخفاء' : 'إظهار';
       });
 
+      dom.toggleGhTokenVisBtn.addEventListener('click', () => {
+        const isPass = dom.ghTokenInput.type === 'password';
+        dom.ghTokenInput.type = isPass ? 'text' : 'password';
+        dom.toggleGhTokenVisBtn.textContent = isPass ? 'إخفاء' : 'إظهار';
+      });
+
+      dom.syncNowBtn.addEventListener('click', async () => {
+        const typedToken = (dom.ghTokenInput.value || '').trim();
+        if (typedToken) {
+          state.ghToken = typedToken;
+          localStorage.setItem(STORAGE_KEYS.GH_TOKEN, typedToken);
+        }
+        if (!state.ghToken) {
+          showToast('أدخل GitHub Token أولاً للمزامنة.', 'warning');
+          return;
+        }
+        await pullFromGitHub(false);
+        schedulePushToGitHub(600);
+      });
+
       dom.saveSettingsBtn.addEventListener('click', async () => {
-        const trimmed = (dom.apiKeyInput.value || '').trim();
-        state.apiKey = trimmed;
-        localStorage.setItem(STORAGE_KEYS.API_KEY, trimmed);
+        const trimmedApi = (dom.apiKeyInput.value || '').trim();
+        const trimmedGh = (dom.ghTokenInput.value || '').trim();
+
+        state.apiKey = trimmedApi;
+        state.ghToken = trimmedGh;
+
+        localStorage.setItem(STORAGE_KEYS.API_KEY, trimmedApi);
+        localStorage.setItem(STORAGE_KEYS.GH_TOKEN, trimmedGh);
+
         updateApiStatusUI();
         closeSettingsModal();
-        showToast('تم حفظ مفتاح Gemini API بنجاح.', 'success');
+        showToast('تم حفظ الإعدادات بنجاح.', 'success');
+
+        if (trimmedGh) {
+          await pullFromGitHub(true);
+          schedulePushToGitHub(1000);
+        }
 
         const current = getActiveLesson();
-        if (trimmed && !state.lessonsCache[current.id] && state.activeView === 'lesson') {
+        if (trimmedApi && !state.lessonsCache[current.id] && state.activeView === 'lesson') {
           await generateAndCacheLesson(current);
         }
       });
@@ -2793,6 +3199,7 @@ ${codeVal}
         updateStorageStats();
         renderSidebarTree();
         selectLesson(state.activeLessonId, { autoGenerateIfMissing: false });
+        schedulePushToGitHub(1500);
         showToast('تم مسح الدروس المولّدة المحفوظة.', 'info');
       });
 
@@ -2811,6 +3218,7 @@ ${codeVal}
         updateGlossaryBadge();
         renderSidebarTree();
         selectLesson(state.activeLessonId, { autoGenerateIfMissing: false });
+        schedulePushToGitHub(1200);
         dom.confirmResetBar.classList.add('hidden');
         closeSettingsModal();
         showToast('تم تصفير التقدم والبيانات بالكامل.', 'info');
@@ -2895,6 +3303,12 @@ ${codeVal}
       applyReaderFontSize();
       bindEvents();
       updateApiStatusUI();
+
+      // Pull from GitHub before loading active lesson when GitHub Token is available
+      if ((state.ghToken || '').trim()) {
+        await pullFromGitHub(true);
+      }
+
       updateProgressUI();
       updateStorageStats();
       updateGlossaryBadge();
