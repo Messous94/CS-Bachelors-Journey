@@ -1,0 +1,2104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zero-Gap CS Bachelor's Platform — منصة علوم الحاسب الذكية</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Cairo', 'Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Custom scrollbar for clean reading and navigation */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.35);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.6);
+    }
+
+    /* Strictly enforce LTR on code blocks, terminals, and technical identifiers */
+    .ltr-block {
+      direction: ltr;
+      text-align: left;
+      font-family: 'JetBrains Mono', 'Inter', monospace;
+    }
+
+    pre.code-box {
+      direction: ltr;
+      text-align: left;
+      font-family: 'JetBrains Mono', monospace;
+      tab-size: 2;
+      overflow-x: auto;
+    }
+
+    @keyframes pulseSoft {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.55; }
+    }
+    .animate-pulse-soft {
+      animation: pulseSoft 1.8s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Top Toast / Status Banner (replaces alert/confirm) -->
+  <div id="toastContainer" class="fixed bottom-5 left-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="fixed inset-0 z-40 hidden items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4">
+    <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 font-bold">⚙</span>
+          <div>
+            <h2 class="text-base font-bold">إعدادات المنصة و Gemini API</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">يتم حفظ المفتاح والتقدم والبيانات محلياً على متصفحك</p>
+          </div>
+        </div>
+        <button id="closeSettingsBtn" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">✕</button>
+      </div>
+
+      <div class="p-6 space-y-5">
+        <div>
+          <label for="apiKeyInput" class="block text-sm font-semibold mb-1.5">مفتاح Gemini API Key</label>
+          <div class="relative flex items-center gap-2">
+            <input
+              id="apiKeyInput"
+              type="password"
+              dir="ltr"
+              placeholder="AIzaSy..."
+              class="ltr-block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            />
+            <button id="toggleApiKeyVisBtn" type="button" class="rounded-xl border border-slate-300 dark:border-slate-700 px-3 py-2.5 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition shrink-0">
+              إظهار
+            </button>
+          </div>
+          <p class="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+            يُستخدم لتوليد الدروس تلقائياً بأسلوب <span class="ltr-block font-semibold text-indigo-600 dark:text-indigo-400">gemini-3-flash-preview</span> وتبسيط الأمثلة أو إنشاء اختبارات إضافية.
+          </p>
+        </div>
+
+        <div class="rounded-xl bg-slate-100 dark:bg-slate-800/70 p-4 space-y-2.5">
+          <div class="flex items-center justify-between text-xs font-semibold">
+            <span>إدارة بيانات التخزين المحلي (localStorage)</span>
+            <span id="storageStatsLabel" class="ltr-block text-indigo-600 dark:text-indigo-400">0 Cached Lessons</span>
+          </div>
+          <div class="flex flex-wrap gap-2 pt-1">
+            <button id="exportDataBtn" type="button" class="rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+              تصدير نسخة JSON
+            </button>
+            <button id="clearCacheBtn" type="button" class="rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 px-3 py-1.5 text-xs font-semibold hover:bg-amber-500/20 transition">
+              مسح الدروس المولّدة فقط
+            </button>
+            <button id="resetAllBtn" type="button" class="rounded-lg bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30 px-3 py-1.5 text-xs font-semibold hover:bg-rose-500/20 transition">
+              تصفير التقدم بالكامل
+            </button>
+          </div>
+          <div id="confirmResetBar" class="hidden pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2">
+            <span class="text-xs text-rose-600 dark:text-rose-400 font-semibold">هل أنت متأكد من تصفير كل التقدم والدروس المحفوظة؟</span>
+            <div class="flex gap-2">
+              <button id="confirmResetYes" type="button" class="rounded-lg bg-rose-600 text-white px-3 py-1 text-xs font-bold hover:bg-rose-700">تأكيد</button>
+              <button id="confirmResetNo" type="button" class="rounded-lg bg-slate-200 dark:bg-slate-700 px-3 py-1 text-xs font-semibold">إلغاء</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 px-6 py-4 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-800">
+        <button id="cancelSettingsBtn" type="button" class="rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800 transition">إلغاء</button>
+        <button id="saveSettingsBtn" type="button" class="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 text-sm font-bold shadow-lg shadow-indigo-600/25 transition">حفظ الإعدادات</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Shell -->
+  <div class="min-h-screen flex flex-col">
+    <!-- Top Header -->
+    <header class="sticky top-0 z-30 h-16 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 lg:px-6 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <button id="mobileSidebarBtn" type="button" class="lg:hidden rounded-xl p-2.5 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition" aria-label="فتح القائمة">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white flex items-center justify-center font-extrabold text-sm shadow-md shadow-indigo-600/20 shrink-0">
+            ZG
+          </div>
+          <div class="truncate">
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold text-sm sm:text-base tracking-tight truncate">Zero-Gap CS Platform</span>
+              <span class="hidden sm:inline-flex items-center rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2.5 py-0.5 text-[11px] font-bold ltr-block">26 Courses • 208 Lessons</span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">منصة توليد الدروس الذكية وفق منهج بكالوريوس علوم الحاسب بدون فجوات</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overall Progress Pill & Actions -->
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div class="hidden md:flex items-center gap-3 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/70 rounded-xl px-3.5 py-1.5">
+          <div class="text-right">
+            <div class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">التقدم الكلي</div>
+            <div id="headerProgressText" class="text-xs font-extrabold ltr-block text-indigo-600 dark:text-indigo-400">0 / 208 (0.0%)</div>
+          </div>
+          <div class="w-24 h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+            <div id="headerProgressBar" class="h-full bg-gradient-to-r from-indigo-600 to-emerald-500 transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <button id="themeToggleBtn" type="button" class="rounded-xl p-2.5 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-sm" title="تبديل الوضع الليلي/النهاري">
+          <span id="themeIcon">🌙</span>
+        </button>
+
+        <button id="openSettingsBtn" type="button" class="flex items-center gap-2 rounded-xl bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-700 text-white px-3.5 py-2 text-xs sm:text-sm font-bold shadow-sm transition">
+          <span>⚙</span>
+          <span>الإعدادات و API</span>
+          <span id="apiStatusDot" class="h-2 w-2 rounded-full bg-amber-400" title="حالة مفتاح API"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Body Grid: Sidebar + Main Content -->
+    <div class="flex-1 flex relative">
+      <!-- Mobile Overlay -->
+      <div id="sidebarBackdrop" class="fixed inset-0 z-30 bg-slate-950/60 backdrop-blur-xs hidden lg:hidden"></div>
+
+      <!-- Curriculum Sidebar -->
+      <aside id="curriculumSidebar" class="fixed lg:sticky top-16 right-0 z-40 lg:z-10 h-[calc(100vh-4rem)] w-80 sm:w-96 shrink-0 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col transform translate-x-full lg:translate-x-0 transition-transform duration-200 ease-out">
+        <!-- Sidebar Top Summary & Search -->
+        <div class="p-4 border-b border-slate-200 dark:border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="font-extrabold text-sm">خريطة المنهج الكاملة</h2>
+            <span id="sidebarCompletedBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 ltr-block">0 / 208</span>
+          </div>
+
+          <div class="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+            <div id="sidebarProgressBar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 0%"></div>
+          </div>
+
+          <div class="relative">
+            <input
+              id="lessonSearchInput"
+              type="text"
+              placeholder="ابحث برمز الدرس أو العنوان (مثال: HW101-05 أو RAM)..."
+              class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-3.5 py-2 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            />
+            <button id="clearSearchBtn" type="button" class="hidden absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600">✕</button>
+          </div>
+        </div>
+
+        <!-- Scrollable Stages -> Courses -> 208 Lessons -->
+        <div id="curriculumTreeContainer" class="flex-1 overflow-y-auto p-3 space-y-3"></div>
+      </aside>
+
+      <!-- Main Lesson Workspace -->
+      <main class="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full space-y-6">
+        <!-- API Warning Banner if missing -->
+        <div id="missingApiBanner" class="hidden rounded-2xl border border-amber-300/70 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/30 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-start gap-3">
+            <span class="text-xl mt-0.5">🔑</span>
+            <div>
+              <h3 class="text-sm font-bold text-amber-900 dark:text-amber-200">مفتاح Gemini API غير مُدخل بعد</h3>
+              <p class="text-xs text-amber-800/80 dark:text-amber-300/80 mt-0.5">
+                أدخل مفتاح API الخاص بك من الإعدادات لتوليد الدروس الـ 208 تلقائياً وتنفيذ التعمق والاختبارات الإضافية داخل المنصة.
+              </p>
+            </div>
+          </div>
+          <button id="bannerOpenSettingsBtn" type="button" class="rounded-xl bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 text-xs font-bold shrink-0 transition">
+            إدخال المفتاح الآن
+          </button>
+        </div>
+
+        <!-- Active Lesson Card -->
+        <section id="lessonWorkspace" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          <!-- Lesson Header -->
+          <div class="p-5 sm:p-7 border-b border-slate-200 dark:border-slate-800 bg-gradient-to-bl from-indigo-50/60 via-transparent to-transparent dark:from-indigo-950/20">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div class="flex flex-wrap items-center gap-2">
+                <span id="lessonIdBadge" class="ltr-block rounded-lg bg-indigo-600 text-white px-2.5 py-1 text-xs font-bold">HW101-01</span>
+                <span id="stageBadge" class="rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 text-xs font-semibold">المرحلة ١</span>
+                <span id="courseBadge" class="rounded-lg bg-violet-500/10 text-violet-700 dark:text-violet-300 px-2.5 py-1 text-xs font-semibold">HW101</span>
+                <span id="cachedBadge" class="hidden rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 text-xs font-bold">⚡ محفوظ محلياً</span>
+              </div>
+
+              <!-- Mark Lesson Completed Toggle -->
+              <label class="inline-flex items-center gap-2.5 cursor-pointer select-none rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/70 px-3.5 py-2 hover:border-emerald-500/60 transition">
+                <input id="lessonCompletedCheckbox" type="checkbox" class="h-4 w-4 rounded accent-emerald-600 cursor-pointer" />
+                <span id="lessonCompletedLabel" class="text-xs font-bold text-slate-700 dark:text-slate-200">تم إتمام الدرس</span>
+              </label>
+            </div>
+
+            <h1 id="lessonTitleHeading" class="text-xl sm:text-2xl lg:text-3xl font-extrabold leading-snug text-slate-900 dark:text-white">
+              جاري تحميل الدرس...
+            </h1>
+            <p id="lessonFocusSubtitle" class="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed"></p>
+
+            <!-- Prerequisites Bar -->
+            <div class="mt-4 pt-4 border-t border-slate-200/70 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span class="font-bold text-slate-500 dark:text-slate-400">المتطلبات السابقة:</span>
+                <div id="prereqsList" class="flex flex-wrap gap-1.5"></div>
+              </div>
+
+              <!-- Action Buttons inside Lesson -->
+              <div class="flex flex-wrap items-center gap-2">
+                <button id="generateLessonBtn" type="button" class="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+                  <span>✨</span>
+                  <span id="generateLessonBtnText">توليد الدرس الآن</span>
+                </button>
+
+                <button id="simplerExampleBtn" type="button" class="rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-500/30 px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5">
+                  <span>💡</span>
+                  <span>اشرحلي بمثال أبسط</span>
+                </button>
+
+                <button id="extraQuizBtn" type="button" class="rounded-xl bg-violet-500/10 hover:bg-violet-500/20 text-violet-700 dark:text-violet-300 border border-violet-500/30 px-3.5 py-2 text-xs font-bold transition flex items-center gap-1.5">
+                  <span>📝</span>
+                  <span>اعملي اختبار إضافي</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lesson Content Area -->
+          <div class="p-5 sm:p-7 space-y-8">
+            <!-- Loading State -->
+            <div id="loadingState" class="hidden py-12 text-center space-y-3">
+              <div class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 text-2xl animate-pulse-soft">
+                🧠
+              </div>
+              <h3 id="loadingTitle" class="text-base font-extrabold">جاري توليد الدرس وفق قواعد Zero-Gap...</h3>
+              <p id="loadingSubtitle" class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                يتم إعداد المصطلحات الأساسية، الهدف، الشرح العميق بالمصري، الأمثلة البرمجية، والكويز التفاعلي.
+              </p>
+            </div>
+
+            <!-- Empty / Prompt State (when not yet generated) -->
+            <div id="emptyLessonState" class="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center space-y-3">
+              <div class="text-3xl">📘</div>
+              <h3 class="text-base font-extrabold">هذا الدرس لم يُولَّد بعد على جهازك</h3>
+              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
+                اضغط على زر <span class="font-bold text-indigo-600 dark:text-indigo-400">«توليد الدرس الآن»</span> لإرسال طلب فوري إلى <span class="ltr-block">Gemini API</span> وبناء الدرس كاملاً مع حفظه تلقائياً في <span class="ltr-block">localStorage</span> ليفتح فوراً في المرات القادمة.
+              </p>
+            </div>
+
+            <!-- Rendered Structured Lesson -->
+            <div id="renderedLessonContent" class="hidden space-y-8">
+              <!-- 1. Key Terms -->
+              <section class="space-y-3">
+                <div class="flex items-center gap-2">
+                  <span class="h-7 w-7 rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-extrabold text-xs">1</span>
+                  <h2 class="text-base sm:text-lg font-extrabold">المصطلحات الأساسية (Key Terms)</h2>
+                </div>
+                <div id="keyTermsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+              </section>
+
+              <!-- 2. Objectives & Why It Matters -->
+              <section class="space-y-3">
+                <div class="flex items-center gap-2">
+                  <span class="h-7 w-7 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-extrabold text-xs">2</span>
+                  <h2 class="text-base sm:text-lg font-extrabold">الهدف من الدرس وأهميته الهندسية</h2>
+                </div>
+                <div id="objectivesBox" class="rounded-2xl bg-emerald-500/5 border border-emerald-500/20 p-4 sm:p-5 space-y-3 text-sm leading-relaxed"></div>
+              </section>
+
+              <!-- 3. Deep Explanation in Egyptian Arabic -->
+              <section class="space-y-3">
+                <div class="flex items-center gap-2">
+                  <span class="h-7 w-7 rounded-lg bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-extrabold text-xs">3</span>
+                  <h2 class="text-base sm:text-lg font-extrabold">الشرح العميق التفصيلي (بالمصري)</h2>
+                </div>
+                <div id="deepExplanationBox" class="rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 space-y-4 text-sm sm:text-[15px] leading-8"></div>
+              </section>
+
+              <!-- 4. Code & Hardware/Memory Examples (LTR) -->
+              <section class="space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="h-7 w-7 rounded-lg bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-extrabold text-xs">4</span>
+                    <h2 class="text-base sm:text-lg font-extrabold">الأمثلة العملية والتطبيقات (Code & Trace)</h2>
+                  </div>
+                  <span class="ltr-block text-[11px] font-semibold text-slate-400">LTR Code View</span>
+                </div>
+                <div id="examplesContainer" class="space-y-4"></div>
+              </section>
+
+              <!-- 5. Interactive Quiz -->
+              <section id="mainQuizSection" class="space-y-4 pt-2">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="h-7 w-7 rounded-lg bg-violet-500/15 text-violet-600 dark:text-violet-400 flex items-center justify-center font-extrabold text-xs">5</span>
+                    <h2 class="text-base sm:text-lg font-extrabold">الكويز التفاعلي للتحقق من الفهم</h2>
+                  </div>
+                  <span id="mainQuizScoreBadge" class="hidden rounded-full bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 px-3 py-1 text-xs font-extrabold ltr-block"></span>
+                </div>
+                <div id="mainQuizContainer" class="space-y-4"></div>
+              </section>
+            </div>
+
+            <!-- Dynamic Deep-Dive / Simpler Example / Extra Quiz Panel -->
+            <div id="dynamicAddonPanel" class="hidden rounded-2xl border-2 border-indigo-500/30 bg-indigo-500/5 dark:bg-indigo-950/20 p-5 sm:p-6 space-y-4">
+              <div class="flex items-center justify-between gap-2 border-b border-indigo-500/20 pb-3">
+                <div class="flex items-center gap-2">
+                  <span id="addonIcon" class="text-xl">💡</span>
+                  <h3 id="addonTitle" class="text-base sm:text-lg font-extrabold text-indigo-950 dark:text-indigo-200">إضافة تفاعلية</h3>
+                </div>
+                <button id="closeAddonBtn" type="button" class="rounded-lg px-2.5 py-1 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800 transition">
+                  إغلاق ✕
+                </button>
+              </div>
+              <div id="addonLoading" class="hidden py-6 text-center text-xs sm:text-sm font-semibold text-indigo-700 dark:text-indigo-300 animate-pulse-soft">
+                جاري التواصل مع Gemini API وتجهيز المحتوى المطلوب داخل نفس الصفحة...
+              </div>
+              <div id="addonBody" class="space-y-4 text-sm leading-7"></div>
+            </div>
+          </div>
+
+          <!-- Footer Navigation Between Lessons -->
+          <div class="px-5 sm:px-7 py-4 bg-slate-50 dark:bg-slate-900/70 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+            <button id="prevLessonBtn" type="button" class="rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 px-4 py-2.5 text-xs sm:text-sm font-bold transition disabled:opacity-40 disabled:pointer-events-none">
+              → الدرس السابق
+            </button>
+
+            <div id="currentLessonIndexIndicator" class="text-xs font-bold text-slate-500 dark:text-slate-400 ltr-block">
+              Lesson 1 / 208
+            </div>
+
+            <button id="nextLessonBtn" type="button" class="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 text-xs sm:text-sm font-bold shadow-sm transition disabled:opacity-40 disabled:pointer-events-none">
+              الدرس التالي ←
+            </button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * =========================================================================
+     * ZERO-GAP CS BACHELOR'S PLATFORM — FULL CLIENT APPLICATION
+     * - 6 Stages, 26 Courses, 208 Lessons (Zero-Gap Audited Curriculum)
+     * - Persistent storage in localStorage (API Key, Completed Lessons,
+     *   Generated Lessons, Addon Responses, Theme)
+     * - Gemini 3 Flash Preview API integration with structured JSON output
+     *   and exponential backoff retry logic
+     * =========================================================================
+     */
+
+    const STORAGE_KEYS = {
+      API_KEY: 'zgcs_gemini_api_key_v1',
+      COMPLETED: 'zgcs_completed_lessons_v1',
+      LESSONS_CACHE: 'zgcs_generated_lessons_v1',
+      ACTIVE_LESSON: 'zgcs_active_lesson_id_v1',
+      THEME: 'zgcs_theme_mode_v1'
+    };
+
+    const GEMINI_MODEL = 'gemini-3-flash-preview';
+
+    /**
+     * Complete 6-Stage, 26-Course, 208-Lesson Curriculum Definition
+     * Each course has 8 structured lessons (01 to 08).
+     */
+    const CURRICULUM_STAGES = [
+      {
+        id: 'stage-1',
+        title: 'المرحلة ١: الأساسيات المطلقة (هاردوير + رياضيات تمهيدية + برمجة + Linux)',
+        courses: [
+          {
+            code: 'HW101',
+            name: 'أساسيات الهاردوير والمنطق الرقمي',
+            prereqs: ['لا يوجد (البداية من الصفر)'],
+            lessons: [
+              { title: 'الفيزياء الكهربائية والنظام الثنائي والأرقام السالبة', focus: 'Voltage 0V/5V, Silicon, Binary, Hex, Two\'s Complement' },
+              { title: 'الترانزستورات والبوابات المنطقية والجبر البولياني', focus: 'MOSFET, NOT, NAND, NOR, AND, OR, XOR, De Morgan\'s' },
+              { title: 'الدوائر الحسابية ووحدة الحساب والمنطق', focus: 'Mux/Demux, Half/Full/Ripple-Carry Adders & ALU' },
+              { title: 'الذاكرة التتابعية، نبضة الساعة، والمسجلات', focus: 'Quartz Clock, SR/D Latch, D Flip-Flop & Registers' },
+              { title: 'بناء الذاكرة العشوائية (RAM) من الصفر وكيفية العنونة', focus: 'External Interface & Decoder, DRAM 1T1C & Refresh vs SRAM, 2D Matrix & RAS/CAS, System Buses & ROM/Flash' },
+              { title: 'معمارية المعالج البسيط ودورة الجلب والتنفيذ', focus: 'Datapath, Control Unit, PC, IR & Fetch-Decode-Execute' },
+              { title: 'لغة الآلة ولغة التجميع', focus: 'Machine Code, Opcode/Operands, Assembly & Assembler' },
+              { title: 'مشروع: محاكاة حاسوب متكامل وتشغيل برنامج Assembly عليه', focus: 'End-to-End Simple Computer Simulation & Assembly Execution' }
+            ]
+          },
+          {
+            code: 'MATH100',
+            name: 'الرياضيات التمهيدية واللوغاريتمات',
+            prereqs: ['لا يوجد'],
+            lessons: [
+              { title: 'أساسيات الجبر والمعادلات والمتباينات', focus: 'Linear & Quadratic Equations, Inequalities & Algebraic Manipulation' },
+              { title: 'الدوال والتمثيل البياني ومعدلات النمو', focus: 'Functions, Domain/Range, Graphs & Growth Rates' },
+              { title: 'الأسس واللوغاريتمات', focus: 'Exponents & Binary Logarithms log2' },
+              { title: 'المتتاليات الحسابية والهندسية والمجاميع', focus: 'Arithmetic/Geometric Sequences & Summations (Σ)' },
+              { title: 'أساسيات المجموعات والفترات والدوال الأرضية والسقفية وباقي القسمة', focus: 'Sets, Intervals, Floor/Ceiling Functions & Modulo Arithmetic' },
+              { title: 'مبادئ الاحتمالات البسيطة وقواعد العد الأولية', focus: 'Basic Probability, Sample Space & Fundamental Counting Rules' },
+              { title: 'تطبيق اللوغاريتمات والمجاميع في تحليل الخوارزميات', focus: 'Applying log2 and Summations to Algorithmic Step Counting' },
+              { title: 'تقييم: حل مسائل جبر ولوغاريتمات ومجاميع شاملة', focus: 'Comprehensive Problem Solving Assessment in Pre-Calculus & Logs' }
+            ]
+          },
+          {
+            code: 'CS101',
+            name: 'مدخل علوم الحاسب والبرمجة (Python)',
+            prereqs: ['HW101', 'MATH100'],
+            lessons: [
+              { title: 'الحوسبة، التجريد، والخوارزميات', focus: 'Computation, Abstraction, Algorithms & Hero\'s Method' },
+              { title: 'كفاءة الخوارزميات: البحث الخطي مقابل البحث الثنائي', focus: 'Linear Search vs Binary Search & Step Scaling' },
+              { title: 'القيم، أنواع البيانات في الذاكرة، والتحويل', focus: 'Values, Memory Representation of Types & Type Casting' },
+              { title: 'الشروط المنطقية واتخاذ القرار', focus: 'Conditionals, Relational Operators & Boolean Logic' },
+              { title: 'الدوال، نطاق المتغيرات، Call Stack والاستدعاء الذاتي', focus: 'Functions, LEGB Scope, Call Stack & Recursion' },
+              { title: 'القوائم، السلاسل النصية، والصفوف', focus: 'Lists, Strings, Tuples & Mutability vs Immutability' },
+              { title: 'القواميس، المجموعات، ومعالجة الملفات والاستثناءات', focus: 'Dicts, Sets, File I/O & try / except / finally / raise' },
+              { title: 'مشروع: نظام إدارة بيانات ومعالجة ملفات نصية', focus: 'Capstone Project: Data Management & Text File Processing System' }
+            ]
+          },
+          {
+            code: 'CS102',
+            name: 'بيئة Linux وأدوات المطور (Git & Shell)',
+            prereqs: ['CS101'],
+            lessons: [
+              { title: 'هيكل نظام Linux وأوامر التيرمنال الأساسية', focus: 'Linux Filesystem Hierarchy & Core Shell Commands' },
+              { title: 'الأنابيب وإعادة التوجيه ومعالجة النصوص', focus: 'Pipes (|), Redirection, grep, sed & awk' },
+              { title: 'الصلاحيات وإدارة العمليات في لينكس', focus: 'File Permissions (chmod/chown), Processes, Signals & ps/kill' },
+              { title: 'آلية عمل Git الداخلية', focus: 'Commits, Blobs, Trees, Branches, HEAD & History' },
+              { title: 'حل تعارضات الدمج والعمل التعاوني', focus: 'Merge Conflicts, Rebasing, Remotes & Pull Requests' },
+              { title: 'البيئات المعزولة وإدارة الحزم', focus: 'Virtual Environments (venv) & Package Management (pip)' },
+              { title: 'أتمتة المهام عبر Bash Scripting و Makefiles', focus: 'Shell Scripts, Variables, Loops & Build Automation with Makefiles' },
+              { title: 'مشروع: بناء أداة سطر أوامر (CLI Tool) موثقة', focus: 'Capstone Project: Documented Command-Line Interface Tool' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-2',
+        title: 'المرحلة ٢: الرياضيات المتقطعة وتصميم البرمجيات',
+        courses: [
+          {
+            code: 'MATH101',
+            name: 'الرياضيات المتقطعة ١: المنطق والبرهان',
+            prereqs: ['MATH100'],
+            lessons: [
+              { title: 'المنطق القضائي والكمي وجداول الصواب', focus: 'Propositional/Predicate Logic, Quantifiers & Truth Tables' },
+              { title: 'قواعد الاستنتاج وطرق البرهان الرياضي', focus: 'Direct Proof, Contrapositive, Contradiction & Equivalence' },
+              { title: 'الاستقراء الرياضي والبرهان القوي', focus: 'Mathematical Induction & Strong Induction' },
+              { title: 'الجبر المتقطع للمجموعات والدوال العلائقية', focus: 'Set Identities, Cartesian Products, Relations & Functions' },
+              { title: 'التكافؤ والترتيب الجزئي والشبكات', focus: 'Equivalence Relations, Partial Orders & Lattices' },
+              { title: 'أساسيات العد والتوافقية الأولية', focus: 'Permutations, Combinations & Binomial Coefficients' },
+              { title: 'تطبيقات المنطق والبراهين في التحقق البرمجي', focus: 'Loop Invariants, Boolean Circuits & Formal Reasoning' },
+              { title: 'تقييم: براهين منطقية واستقراء رياضي شامل', focus: 'Comprehensive Proofs & Discrete Logic Assessment' }
+            ]
+          },
+          {
+            code: 'CS103',
+            name: 'تصميم البرامج والبرمجة الكائنية (OOP)',
+            prereqs: ['CS101', 'CS102'],
+            lessons: [
+              { title: 'الفئات والكائنات وحالة الكائن في الذاكرة', focus: 'Classes, Objects, Attributes, Methods & Object References' },
+              { title: 'التغليف وحماية الحالة الداخلية', focus: 'Encapsulation, Properties, Invariants & Information Hiding' },
+              { title: 'الوراثة وتعدد الأشكال والتركيب', focus: 'Inheritance, Polymorphism, Method Overriding & Composition over Inheritance' },
+              { title: 'التجريد والفئات المجردة والواجهات', focus: 'Abstraction, Abstract Base Classes & Interfaces' },
+              { title: 'مبادئ التصميم الموجهة للكائنات (SOLID)', focus: 'Single Responsibility, Open/Closed, Liskov, Interface Segregation & DIP' },
+              { title: 'أنماط التصميم الأساسية', focus: 'Factory, Strategy, Observer & Singleton Design Patterns' },
+              { title: 'الاختبارات الوحدوية والتصميم القابل للاختبار', focus: 'Unit Testing, Mocking, Edge Cases & Testable Architecture' },
+              { title: 'مشروع: تصميم نظام برمجي متكامل بمبادئ OOP', focus: 'Capstone Project: Object-Oriented Software System Design' }
+            ]
+          },
+          {
+            code: 'MATH102',
+            name: 'الرياضيات المتقطعة ٢: العد والاحتمالات والرسوم',
+            prereqs: ['MATH101'],
+            lessons: [
+              { title: 'مبدأ برج الحمام ومبدأ الشمول والإقصاء', focus: 'Pigeonhole Principle & Inclusion-Exclusion Principle' },
+              { title: 'الاحتمالات المتقطعة والمتغيرات العشوائية والتوقع الخطي', focus: 'Discrete Probability, Random Variables & Linearity of Expectation' },
+              { title: 'العلاقات التكرارية وحل المعادلات التراجعية', focus: 'Recurrence Relations, Substitution & Master Method Intuition' },
+              { title: 'مقدمة نظرية الرسوم والمصطلحات الأساسية', focus: 'Graphs, Vertices, Edges, Degrees, Paths & Connectivity' },
+              { title: 'الأشجار وخصائصها الرياضية والتمثيلية', focus: 'Trees, Spanning Trees, Rooted Trees & Traversal Properties' },
+              { title: 'الرسوم الموجهة والموزونة والمسارات والدورات', focus: 'Directed/Weighted Graphs, DAGs, Eulerian & Hamiltonian Concepts' },
+              { title: 'تلوين الرسوم وتطبيقاتها في الشبكات والجدولة', focus: 'Graph Coloring, Scheduling & Network Modeling' },
+              { title: 'تقييم: مسائل عد واحتمالات وعلاقات تكرارية ورسوم', focus: 'Comprehensive Counting, Recurrences & Graph Theory Assessment' }
+            ]
+          },
+          {
+            code: 'CS201',
+            name: 'هياكل البيانات الأساسية (Data Structures)',
+            prereqs: ['CS103', 'MATH102'],
+            lessons: [
+              { title: 'تحليل التعقيد الزمني والمكاني (Big-O, Ω, Θ)', focus: 'Asymptotic Analysis, Time/Space Complexity & Growth Comparison' },
+              { title: 'المصفوفات الديناميكية والقوائم المترابطة', focus: 'Dynamic Arrays (Amortized Growth), Singly/Doubly Linked Lists' },
+              { title: 'المكدسات والطوابير والطوابير الدائرية', focus: 'Stacks, Queues, Circular Buffers & Deques' },
+              { title: 'جداول التجزئة وحل التصادمات', focus: 'Hash Functions, Load Factor, Chaining & Open Addressing' },
+              { title: 'الأشجار الثنائية وأشجار البحث الثنائية', focus: 'Binary Trees, Traversals (DFS/BFS) & Binary Search Trees (BST)' },
+              { title: 'الأشجار المتوازنة (AVL و Red-Black Trees) و Tries', focus: 'AVL Rotations, Red-Black Tree Balancing & Prefix Tries' },
+              { title: 'الأكوام الثنائية وطوابير الأولوية وتمثيل الرسوم', focus: 'Binary Heaps, Priority Queues & Adjacency List/Matrix Graphs' },
+              { title: 'مشروع: بناء مكتبة هياكل بيانات متكاملة من الصفر', focus: 'Capstone Project: Custom Data Structures Library & Benchmarks' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-3',
+        title: 'المرحلة ٣: برمجة الأنظمة، المعمارية، والخوارزميات والرياضيات التطبيقية',
+        courses: [
+          {
+            code: 'CS202',
+            name: 'البرمجة بلغة C وإدارة الذاكرة (Pointers & Heap)',
+            prereqs: ['HW101', 'CS201'],
+            lessons: [
+              { title: 'بنية برنامج C ومراحل الترجمة والربط', focus: 'Preprocessor, Compiler, Assembler, Linker & Executable Layout' },
+              { title: 'المؤشرات وعناوين الذاكرة وحجم الكلمة والذاكرة الافتراضية', focus: 'Pointers, &, *, Pointer Arithmetic, 32/64-bit Word Size & Virtual vs Physical Address' },
+              { title: 'المصفوفات والسلاسل النصية وحساب الإزاحات في الذاكرة', focus: 'Contiguous Arrays, Null-Terminated Strings & Row-Major Memory Offsets' },
+              { title: 'إدارة الذاكرة الديناميكية: Stack مقابل Heap', focus: 'malloc, calloc, realloc, free, Stack Frames vs Heap Allocation & Leaks' },
+              { title: 'الهياكل والاتحادات ومحاذاة البيانات في الذاكرة', focus: 'struct, union, enum, Memory Alignment, Padding & Bitfields' },
+              { title: 'مؤشرات الدوال والواجهات العامة في C', focus: 'Function Pointers, Callbacks & void* Generic Data Structures' },
+              { title: 'أدوات كشف أخطاء الذاكرة وتصحيح الأخطاء', focus: 'Valgrind, AddressSanitizer, GDB & Debugging Segfaults/Use-After-Free' },
+              { title: 'مشروع: بناء مدير ذاكرة مخصص (Custom Allocator)', focus: 'Capstone Project: Custom Heap Memory Allocator in C' }
+            ]
+          },
+          {
+            code: 'CS203',
+            name: 'معمارية الحاسوب ولغة التجميع (Architecture & Assembly)',
+            prereqs: ['HW101', 'CS202'],
+            lessons: [
+              { title: 'معمارية مجموعة التعليمات (ISA) وتصميم مسار البيانات', focus: 'Registers, Instruction Formats, Load/Store vs CISC & Datapath Control' },
+              { title: 'برمجة لغة التجميع واستدعاء الدوال (Calling Convention)', focus: 'Assembly Instructions, Jumps, Stack Frame Setup & ABI Calling Conventions' },
+              { title: 'خط الأنابيب (Pipelining) وتقسيم مراحل التنفيذ', focus: 'IF, ID, EX, MEM, WB Pipeline Stages & Throughput vs Latency' },
+              { title: 'مخاطر خط الأنابيب والتنبؤ بالتفرع', focus: 'Data Hazards, Forwarding, Stalls, Control Hazards & Branch Prediction' },
+              { title: 'التسلسل الهرمي للذاكرة والكاش (L1/L2/L3 Cache)', focus: 'Spatial/Temporal Locality, Direct-Mapped, Set-Associative Cache & Replacement Policies' },
+              { title: 'المعالجات متعددة الأنوية واتساق الكاش (MESI)', focus: 'Multi-Core Architecture, False Sharing & MESI Cache Coherence Protocol' },
+              { title: 'الذاكرة الافتراضية و TLB والمقاطعات', focus: 'Page Tables, TLB Lookup, I/O Polling vs Interrupts & Traps' },
+              { title: 'مشروع: محاكاة معالج Pipelined مع ذاكرة كاش', focus: 'Capstone Project: Pipelined CPU & Cache Simulator' }
+            ]
+          },
+          {
+            code: 'CS204',
+            name: 'تحليل وتصميم الخوارزميات ١ (Algorithms 1)',
+            prereqs: ['CS201', 'MATH102'],
+            lessons: [
+              { title: 'استراتيجية فرق تسد (Divide and Conquer) ومبرهنة الرئيس', focus: 'Recurrence Trees, Master Theorem & Divide-and-Conquer Design' },
+              { title: 'خوارزميات الفرز المتقدمة وتحليلها', focus: 'Merge Sort, Quick Sort, Partitioning Schemes & Stability/Complexity' },
+              { title: 'البحث الثنائي على مجال الحل والاختيار الترتيبي', focus: 'Binary Search on Answer Space & Quickselect' },
+              { title: 'الخوارزميات الجشعة (Greedy Algorithms) وإثبات صحتها', focus: 'Greedy Choice Property, Exchange Arguments, Interval Scheduling & Huffman' },
+              { title: 'استكشاف الرسوم البيانية: BFS و DFS والترتيب الطوبولوجي', focus: 'Breadth-First Search, Depth-First Search, Connected Components & Topological Sort' },
+              { title: 'خوارزميات أقصر المسارات في الرسوم الموزونة', focus: 'Dijkstra\'s Algorithm, Bellman-Ford & Negative Cycles' },
+              { title: 'الأشجار الممتدة الصغرى (MST) وهياكل المجموعات المنفصلة', focus: 'Kruskal, Prim & Disjoint Set Union (Union-Find with Path Compression)' },
+              { title: 'مشروع: محرك توجيه وحساب مسارات على شبكة رسوم', focus: 'Capstone Project: Graph Routing & Pathfinding Engine' }
+            ]
+          },
+          {
+            code: 'MATH201',
+            name: 'التفاضل والتكامل والجبر الخطي',
+            prereqs: ['MATH100'],
+            lessons: [
+              { title: 'المتجهات والضرب النقطي والاتجاهي والمسافات', focus: 'Vectors, Dot Product, Cross Product, Norms & Projections' },
+              { title: 'المصفوفات والتحويلات الخطية والإحداثيات المتجانسة', focus: 'Matrix Multiplication, Linear Transformations, 2D/3D Affine & Homogeneous Coordinates' },
+              { title: 'أنظمة المعادلات الخطية والرتبة والفضاء الصفري', focus: 'Gaussian Elimination, Row Echelon Form, Rank, Basis & Null Space' },
+              { title: 'المحددات والقيم والمتجهات الذاتية و SVD', focus: 'Determinants, Eigenvalues, Eigenvectors, Diagonalization & Singular Value Decomposition' },
+              { title: 'النهايات والاستمرارية وقواعد الاشتقاق', focus: 'Limits, Derivatives, Chain Rule & Rates of Change' },
+              { title: 'الاشتقاق الجزئي والمصفوفة اليعقوبية والتدرج (Gradient)', focus: 'Partial Derivatives, Gradient Vector, Directional Derivatives & Jacobian' },
+              { title: 'التكامل المحدود وغير المحدود والتقريب العددي', focus: 'Integrals, Fundamental Theorem of Calculus & Numerical Quadrature' },
+              { title: 'مشروع: تطبيق الجبر الخطي والتدرج في التحسين العددي', focus: 'Capstone Project: Linear Algebra & Gradient Optimization Toolkit' }
+            ]
+          },
+          {
+            code: 'MATH202',
+            name: 'الاحتمالات والإحصاء التطبيقي',
+            prereqs: ['MATH102', 'MATH201'],
+            lessons: [
+              { title: 'الاحتمال الشرطي والاستقلال ونظرية بايز', focus: 'Conditional Probability, Independence, Law of Total Probability & Bayes\' Theorem' },
+              { title: 'التوزيعات الاحتمالية المنفصلة والمستمرة', focus: 'Bernoulli, Binomial, Poisson, Uniform & Exponential Distributions' },
+              { title: 'التوقع الرياضي والتباين والانحراف المعياري والتغاير', focus: 'Expectation, Variance, Covariance, Correlation & Moment Generating Intuition' },
+              { title: 'التوزيع الطبيعي وقانون الأعداد الكبيرة والنهاية المركزية', focus: 'Normal Distribution, Law of Large Numbers & Central Limit Theorem (CLT)' },
+              { title: 'التقدير الإحصائي وفترات الثقة', focus: 'Point Estimation, Bias/Variance Tradeoff & Confidence Intervals' },
+              { title: 'اختبار الفرضيات الإحصائية والقيمة الاحتمالية', focus: 'Null/Alternative Hypotheses, Type I/II Errors, p-value & Significance' },
+              { title: 'الانحدار الخطي وتقييم النماذج الإحصائية', focus: 'Simple/Multiple Linear Regression, Least Squares & Residual Analysis' },
+              { title: 'مشروع: تحليل بيانات إحصائي وتقرير استدلالي متكامل', focus: 'Capstone Project: Statistical Data Analysis & Inference Pipeline' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-4',
+        title: 'المرحلة ٤: البنية التحتية العميقة',
+        courses: [
+          {
+            code: 'CS301',
+            name: 'أنظمة التشغيل (Operating Systems)',
+            prereqs: ['CS202', 'CS203'],
+            lessons: [
+              { title: 'بنية النواة والعمليات واستدعاءات النظام', focus: 'Kernel vs User Mode, Process Control Block (PCB), fork/exec & System Calls' },
+              { title: 'جدولة المعالج وخوارزميات التخصيص', focus: 'FCFS, SJF/STCF, Round Robin, Multi-Level Feedback Queue & Context Switching' },
+              { title: 'الخيوط والتزامن وحالات السباق', focus: 'User/Kernel Threads, Shared Address Space, Race Conditions & Critical Sections' },
+              { title: 'الأقفال والسيمافور والمتغيرات الشرطية والجمود', focus: 'Mutexes, Spinlocks, Semaphores, Condition Variables & Deadlock Conditions' },
+              { title: 'إدارة الذاكرة الافتراضية والصفحات واستبدال الصفحات', focus: 'Paging, Multi-Level Page Tables, Page Faults, Swapping & LRU/Clock Replacement' },
+              { title: 'أنظمة الملفات والـ Inodes والأدلة', focus: 'Inodes, Data Blocks, Directories, Hard/Soft Links & Journaling Basics' },
+              { title: 'أدوات الإدخال والإخراج والأقراص والـ DMA', focus: 'Device Drivers, Interrupts, Direct Memory Access & Storage Scheduling' },
+              { title: 'مشروع: بناء Shell متكامل ونظام جدولة عمليات مصغر', focus: 'Capstone Project: Unix-like Shell & Mini Process Scheduler' }
+            ]
+          },
+          {
+            code: 'CS302',
+            name: 'شبكات الحاسوب (Computer Networks)',
+            prereqs: ['CS301'],
+            lessons: [
+              { title: 'نماذج الطبقات (OSI و TCP/IP) والتغليف', focus: 'Encapsulation, Decapsulation, Throughput, Delay, Loss & Protocol Layering' },
+              { title: 'الطبقة الفيزيائية وربط البيانات و Ethernet و Wi-Fi', focus: 'Framing, MAC Addresses, ARP, Switches, Ethernet & Wi-Fi CSMA/CA' },
+              { title: 'عنونة الشبكات والتوجيه وبروتوكولات المسارات', focus: 'IPv4/IPv6, CIDR Subnetting, NAT, Forwarding Tables, OSPF & BGP Concepts' },
+              { title: 'بروتوكول UDP وبروتوكول TCP الموثوق', focus: 'Ports, UDP Datagram, TCP 3-Way Handshake, Sequence/ACK Numbers & Retransmission' },
+              { title: 'التحكم في التدفق والازدحام في الشبكات', focus: 'Sliding Window, Flow Control, Slow Start, Congestion Avoidance & Packet Loss Signals' },
+              { title: 'بروتوكولات طبقة التطبيق: DNS و HTTP/HTTPS و TLS', focus: 'DNS Resolution Hierarchy, HTTP Request/Response, Cookies, TLS Handshake & Web Security' },
+              { title: 'برمجة المقابس (Socket Programming) والتعامل مع الاتصالات', focus: 'TCP/UDP Sockets, Bind/Listen/Accept, Non-Blocking I/O & Timeouts' },
+              { title: 'مشروع: بناء خادم ويب (HTTP Server) من الصفر عبر Sockets', focus: 'Capstone Project: Multi-Client HTTP Server Built with Raw Sockets' }
+            ]
+          },
+          {
+            code: 'CS303',
+            name: 'قواعد البيانات وهندستها الداخلية (Databases)',
+            prereqs: ['CS201', 'MATH101'],
+            lessons: [
+              { title: 'النموذج العلائقي والجبر العلائقي ولغة SQL', focus: 'Relational Model, Keys, Joins, Aggregations, Subqueries & Relational Algebra' },
+              { title: 'تصميم المخططات والتطبيع (Normalization)', focus: 'ER Modeling, Functional Dependencies, 1NF, 2NF, 3NF & BCNF' },
+              { title: 'تخزين البيانات على القرص والصفحات والفهارس', focus: 'Slotted Pages, Heap Files, B+ Trees, Hash Indexes & Clustered vs Secondary Indexes' },
+              { title: 'تنفيذ الاستعلامات وتحسين خطط التنفيذ', focus: 'Scan/Join Algorithms, Cost Estimation, Query Plans & Index Selection' },
+              { title: 'المعاملات وخصائص ACID وعزل المعاملات', focus: 'Atomicity, Consistency, Isolation, Durability & Dirty/Non-Repeatable/Phantom Reads' },
+              { title: 'التحكم في التزامن والأقفال و MVCC', focus: 'Two-Phase Locking (2PL), Deadlock Handling & Multi-Version Concurrency Control' },
+              { title: 'الاسترداد من الأعطال وسجل الكتابة المسبقة (WAL)', focus: 'Buffer Pool Manager, Write-Ahead Logging (WAL), Checkpoints & Crash Recovery' },
+              { title: 'مشروع: بناء محرك تخزين وفهرسة واستعلام مصغر', focus: 'Capstone Project: Mini Storage, B-Tree Index & Query Engine' }
+            ]
+          },
+          {
+            code: 'CS304',
+            name: 'نظرية الحوسبة (Theory of Computation)',
+            prereqs: ['MATH102', 'CS204'],
+            lessons: [
+              { title: 'الأبجديات واللغات والآلات المحدودة (DFA و NFA)', focus: 'Alphabets, Strings, Languages, Deterministic/Non-Deterministic Finite Automata & Equivalence' },
+              { title: 'التعبيرات النمطية ومبرهنة الضخ للغات المنتظمة', focus: 'Regular Expressions, Kleene\'s Theorem & Pumping Lemma for Regular Languages' },
+              { title: 'القواعد الحرة السياق (CFG) وآلات المكدس (PDA)', focus: 'Context-Free Grammars, Parse Trees, Ambiguity & Pushdown Automata' },
+              { title: 'آلات تورنغ (Turing Machines) وأطروحة تشيرش-تورينغ', focus: 'Turing Machine Formal Definition, Tape Operations, Multi-Tape & Church-Turing Thesis' },
+              { title: 'القابلية للحساب والاختزال ومشكلة التوقف', focus: 'Decidable vs Recognizable Languages, Reductions & Halting Problem Undecidability' },
+              { title: 'مقدمة التعقيد الحسابي وأصناف P و NP', focus: 'Time Complexity, Polynomial Time, P, NP & Verifiers' },
+              { title: 'الاختزال متعدد الحدود واكتمال NP-Completeness', focus: 'Polynomial-Time Reductions, NP-Hard, NP-Complete & SAT/Cook-Levin Intuition' },
+              { title: 'تقييم: تصميم آلات وبراهين القابلية للحساب والتعقيد', focus: 'Comprehensive Theory of Computation Proofs & Automata Design Assessment' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-5',
+        title: 'المرحلة ٥: الهندسة المتقدمة',
+        courses: [
+          {
+            code: 'CS305',
+            name: 'بناء المترجمات ولغات البرمجة (Compilers)',
+            prereqs: ['CS202', 'CS304'],
+            lessons: [
+              { title: 'معمارية المترجم ومراحل الترجمة من المصدر للهدف', focus: 'Lexer, Parser, Semantic Analyzer, IR, Optimizer & Code Generator' },
+              { title: 'التحليل المعجمي (Lexical Analysis) والرموز (Tokens)', focus: 'Finite Automata for Scanners, Token Streams & Lexing Error Handling' },
+              { title: 'التحليل النحوي (Parsing) وشجرة التجريد النحوية (AST)', focus: 'Context-Free Grammars, Recursive Descent / Pratt Parsing & Abstract Syntax Trees' },
+              { title: 'التحليل الدلالي وفحص الأنواع وجدول الرموز', focus: 'Symbol Tables, Lexical Scoping, Type Checking & Type Inference Basics' },
+              { title: 'التمثيل الوسيط (IR) وبناء الرسوم البيانية للتحكم', focus: 'Three-Address Code / SSA Concepts & Control Flow Graphs (CFG)' },
+              { title: 'تحسين الكود المحلي والعام', focus: 'Constant Folding, Dead Code Elimination, Loop Optimizations & Dataflow Analysis' },
+              { title: 'توليد الشيفرة وتخصيص المسجلات', focus: 'Instruction Selection, Register Allocation, Graph Coloring & Stack/Register Mapping' },
+              { title: 'مشروع: بناء مترجم/مفسر لغة برمجة متكاملة', focus: 'Capstone Project: Compiler or Interpreter for a Custom Programming Language' }
+            ]
+          },
+          {
+            code: 'CS306',
+            name: 'الخوارزميات المتقدمة والبرمجة الديناميكية',
+            prereqs: ['CS204'],
+            lessons: [
+              { title: 'البرمجة الديناميكية: التداخل والتقسيم الأمثل', focus: 'Overlapping Subproblems, Optimal Substructure, Memoization vs Tabulation' },
+              { title: 'مسائل البرمجة الديناميكية الكلاسيكية على السلاسل والفترات', focus: 'LCS, Edit Distance, Knapsack Variants & Interval/Matrix Chain DP' },
+              { title: 'البرمجة الديناميكية على الأشجار والرسوم وأقنعة البتات', focus: 'Tree DP, DAG DP, Bitmask DP & State Compression' },
+              { title: 'خوارزميات الشبكات والتدفق الأعظم (Max-Flow)', focus: 'Flow Networks, Augmenting Paths, Ford-Fulkerson, Edmonds-Karp & Min-Cut Theorem' },
+              { title: 'معالجة النصوص المتقدمة ومطابقة الأنماط', focus: 'KMP Prefix Function, Z-Algorithm, Rabin-Karp Hashing & Trie Automata' },
+              { title: 'هياكل البيانات المتقدمة للبحث والاستعلام على المجالات', focus: 'Segment Trees, Lazy Propagation, Fenwick Trees (BIT) & Sparse Tables' },
+              { title: 'الخوارزميات التقريبية والعشوائية والتعامل مع الصعوبة', focus: 'Approximation Ratios, Randomized Algorithms, Monte Carlo vs Las Vegas & Heuristics' },
+              { title: 'مشروع: حل منظومة مسائل خوارزمية متقدمة وتحليل الأداء', focus: 'Capstone Project: Advanced Algorithms Suite & Benchmark Report' }
+            ]
+          },
+          {
+            code: 'CS307',
+            name: 'هندسة البرمجيات والاختبارات (Software Engineering)',
+            prereqs: ['CS103', 'CS303'],
+            lessons: [
+              { title: 'هندسة المتطلبات وتحديد النطاق والواجهات', focus: 'Functional/Non-Functional Requirements, Domain Modeling & API Contracts' },
+              { title: 'المعمارية البرمجية وتقسيم الأنظمة والاعتماديات', focus: 'Layered, Modular & Event-Driven Architecture, Coupling vs Cohesion' },
+              { title: 'إدارة الحالة والبيانات وتصميم طبقات الخدمة', focus: 'Separation of Concerns, Repositories, Services, Error Boundaries & Validation' },
+              { title: 'هرم الاختبارات: الوحدوي والتكاملي والطرفي', focus: 'Unit, Integration, End-to-End Testing, Test Doubles & Coverage Meaning' },
+              { title: 'إعادة الهيكلة (Refactoring) وإدارة الديون التقنية', focus: 'Code Smells, Incremental Refactoring, Backward Compatibility & Migrations' },
+              { title: 'التكامل والتسليم المستمر (CI/CD) وجودة الشيفرة', focus: 'Automated Pipelines, Linters, Static Analysis, Release Versioning & Rollbacks' },
+              { title: 'المراقبة والسجلات والقياس في الإنتاج', focus: 'Structured Logging, Metrics, Tracing, Health Checks & Incident Postmortems' },
+              { title: 'مشروع: هندسة وتسليم مشروع برمجي متكامل باختبارات و CI', focus: 'Capstone Project: Full-Lifecycle Tested Software System with CI Workflow' }
+            ]
+          },
+          {
+            code: 'CS308',
+            name: 'أمن المعلومات والتشفير (Cybersecurity)',
+            prereqs: ['CS301', 'CS302'],
+            lessons: [
+              { title: 'مبادئ الأمن ونماذج التهديدات والسرية والسلامة والتوافر', focus: 'CIA Triad, Threat Modeling, Attack Surfaces, Least Privilege & Defense in Depth' },
+              { title: 'التشفير المتماثل ودوال التجزئة التشفيرية', focus: 'Block/Stream Ciphers, AES Modes (GCM), Cryptographic Hash Functions & HMAC' },
+              { title: 'التشفير غير المتماثل وتبادل المفاتيح والتوقيع الرقمي', focus: 'Modular Arithmetic Intuition, RSA/ECC Concepts, Diffie-Hellman & Digital Signatures' },
+              { title: 'إدارة الهوية والمصادقة والصلاحيات والجلسات', focus: 'Password Hashing (Argon2/bcrypt), MFA, Tokens, RBAC & Session Security' },
+              { title: 'أمن الذاكرة والبرمجيات وثغرات التنفيذ', focus: 'Buffer Overflows, Format Strings, Injection Flaws, ASLR/DEP & Input Sanitization' },
+              { title: 'أمن الشبكات وبروتوكولات النقل الآمن', focus: 'TLS/PKI, Certificate Validation, Firewalls, MitM Attacks & DNS/HTTP Hardening' },
+              { title: 'تحليل الثغرات والاستجابة للحوادث والاختبار الدفاعي', focus: 'Vulnerability Assessment, Patch Management, Audit Logs & Incident Response' },
+              { title: 'مشروع: بناء نظام مصادقة وتشفير وتدقيق أمني متكامل', focus: 'Capstone Project: Secure Auth, Crypto & Audit Logging System' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stage-6',
+        title: 'المرحلة ٦: التخصصات المتقدمة ومشروع التخرج',
+        courses: [
+          {
+            code: 'CS401',
+            name: 'الأنظمة الموزعة والحوسبة السحابية (Distributed Systems)',
+            prereqs: ['CS301', 'CS302', 'CS303'],
+            lessons: [
+              { title: 'أساسيات الأنظمة الموزعة والأعطال الجزئية والشبكات', focus: 'Partial Failures, Network Partitions, Timeouts, Retries & Idempotency' },
+              { title: 'الترتيب الزمني والساعات المنطقية وحالات النظام', focus: 'Physical Clocks vs Logical Clocks (Lamport/Vector Clocks) & State Machines' },
+              { title: 'نماذج الاتساق ومبرهنة CAP و PACELC', focus: 'Strong vs Eventual Consistency, Linearizability, CAP Theorem & PACELC' },
+              { title: 'التكرار والتوافق الموزع (Replication & Consensus)', focus: 'Leader-Follower Replication, Quorum Reads/Writes & Raft/Paxos Concepts' },
+              { title: 'التقسيم (Sharding) والتوجيه وتوزيع الأحمال', focus: 'Consistent Hashing, Partitioning Strategies, Rebalancing & Hotspots' },
+              { title: 'المعاملات الموزعة والأنماط التعويضية', focus: 'Two-Phase Commit (2PC) Limitations, Saga Pattern & Outbox Pattern' },
+              { title: 'المرونة والمراقبة والاختبار ضد الأعطال', focus: 'Circuit Breakers, Backpressure, Rate Limiting, Distributed Tracing & Chaos Testing' },
+              { title: 'مشروع: بناء نظام تخزين أو خدمة موزعة متحملة للأعطال', focus: 'Capstone Project: Fault-Tolerant Replicated/Partitioned Service' }
+            ]
+          },
+          {
+            code: 'CS402',
+            name: 'الذكاء الاصطناعي وتعلم الآلة (AI & Machine Learning)',
+            prereqs: ['MATH201', 'MATH202', 'CS204'],
+            lessons: [
+              { title: 'أساسيات تعلم الآلة وتمثيل البيانات ودوال الخسارة', focus: 'Supervised/Unsupervised/RL, Features, Train/Val/Test Splits & Loss Functions' },
+              { title: 'الانحدار والتصنيف والانحدار اللوجستي', focus: 'Linear/Logistic Regression, Decision Boundaries, Gradient Descent & Optimization' },
+              { title: 'الأشجار والغابات العشوائية وتعزيز التدرج', focus: 'Decision Trees, Gini/Entropy, Random Forests & Gradient Boosted Trees' },
+              { title: 'التعميم والإفراط في التخصيص والتنظيم', focus: 'Bias-Variance Tradeoff, Overfitting, Underfitting, L1/L2 Regularization & Cross-Validation' },
+              { title: 'مقاييس التقييم وتشخيص الأخطاء في النماذج', focus: 'Accuracy, Precision, Recall, F1-Score, ROC/AUC, Confusion Matrix & Data Leakage' },
+              { title: 'الشبكات العصبية والانتشار العكسي (Backpropagation)', focus: 'Perceptrons, MLPs, Activation Functions, Chain Rule & Backpropagation' },
+              { title: 'التعلم غير الخاضع للإشراف والتجميع وتقليل الأبعاد', focus: 'K-Means Clustering, PCA Intuition, Embeddings & Representation Learning' },
+              { title: 'مشروع: بناء خط أنابيب تعلم آلة كامل وتقييمه علمياً', focus: 'Capstone Project: End-to-End ML Pipeline, Baselines & Error Analysis' }
+            ]
+          },
+          {
+            code: 'CS403',
+            name: 'الحوسبة المتوازية وتحسين الأداء (Parallel Computing)',
+            prereqs: ['CS203', 'CS301'],
+            lessons: [
+              { title: 'قياس الأداء وقانون أمدال وقابلية التوازي', focus: 'Latency vs Throughput, Speedup, Efficiency, Amdahl\'s Law & Gustafson\'s Law' },
+              { title: 'البرمجة بالخيوط والذاكرة المشتركة والتوازي البياناتي', focus: 'Thread Pools, Work Stealing, Data vs Task Parallelism & Contention' },
+              { title: 'المتجهات والتعليمات SIMD وتحسين الوصول للذاكرة', focus: 'SIMD Vectorization, Cache Locality, Stride Access, Prefetching & False Sharing Elimination' },
+              { title: 'التزامن المتقدم والهياكل الخالية من الأقفال', focus: 'Atomic Operations, Memory Ordering, Lock-Free / Wait-Free Concepts & ABA Awareness' },
+              { title: 'أنماط الخوارزميات المتوازية: Parallel Map, Reduce, Scan', focus: 'Parallel Reduction, Prefix Sum (Scan), Parallel Merge/Sort & Load Balancing' },
+              { title: 'الحوسبة على المسرعات والـ GPU (مفاهيم أساسية)', focus: 'Host vs Device Memory, Warps/Blocks, SIMT Execution & Memory Coalescing' },
+              { title: 'القياس والملفات التعريفية (Profiling) وكشف الاختناقات', focus: 'CPU Profilers, Flamegraphs, Cache Miss Counters & Bottleneck Analysis' },
+              { title: 'مشروع: تسريع خوارزمية أو معالج بيانات ثقيل وقياس التحسن', focus: 'Capstone Project: Parallelized High-Performance Workload & Speedup Benchmark' }
+            ]
+          },
+          {
+            code: 'CS404',
+            name: 'الرسوميات الحاسوبية والمحاكاة ثلاثية الأبعاد',
+            prereqs: ['MATH201', 'CS203'],
+            lessons: [
+              { title: 'نظام الإحداثيات والتحويلات الهندسية والمتجانسة', focus: '2D/3D Spaces, Translation, Rotation, Scaling, Homogeneous Matrices & Scene Graphs' },
+              { title: 'إسقاط الكاميرا وعرض المشهد ثلاثي الأبعاد', focus: 'View Matrix, Orthographic vs Perspective Projection, Frustum & Viewport Transform' },
+              { title: 'خط أنابيب الرسوميات (Graphics Pipeline) والـ Rasterization', focus: 'Vertices, Triangles, Clipping, Rasterization, Z-Buffer & Fragment Processing' },
+              { title: 'النماذج الضوئية والإضاءة والظلال', focus: 'Ambient, Diffuse, Specular Lighting (Phong/Blinn-Phong), Normals & Shadow Mapping' },
+              { title: 'الخامات والإحداثيات النسيجية والشفافية', focus: 'UV Mapping, Texture Filtering, Mipmaps, Normal Maps & Alpha Blending' },
+              { title: 'تتبع الأشعة (Ray Tracing) والانعكاس والانكسار', focus: 'Ray-Sphere/Triangle Intersection, Shading Rays, Reflections, Refraction & Spatial Acceleration' },
+              { title: 'الرسوميات الإجرائية والمنحنيات والمحاكاة الفيزيائية', focus: 'Bezier/Splines, Procedural Textures, Particle Systems & Numerical Integration' },
+              { title: 'مشروع: محرك عرض أو تتبع أشعة أو محاكاة ثلاثية الأبعاد', focus: 'Capstone Project: 3D Renderer, Ray Tracer or Physics Simulation' }
+            ]
+          },
+          {
+            code: 'CS490',
+            name: 'مشروع التخرج الهندسي المتكامل (Final Capstone)',
+            prereqs: ['جميع المواد السابقة (25 مادة)'],
+            lessons: [
+              { title: 'اختيار مشكلة هندسية حقيقية وصياغة المواصفات', focus: 'Problem Definition, Scope, Constraints, Architecture Goals & Success Criteria' },
+              { title: 'التصميم المعماري الشامل وتقسيم المكونات والواجهات', focus: 'System Architecture, Data Flow, Failure Modes, Tradeoffs & ADRs' },
+              { title: 'إعداد بيئة العمل والبنية التحتية والنماذج الأولية', focus: 'Repository Structure, Core Skeleton, CI Setup & Risky Prototype Validation' },
+              { title: 'بناء النواة الأساسية والمنطق الجوهري للنظام', focus: 'Core Engine Implementation, Clean Interfaces & Incremental Milestones' },
+              { title: 'التكامل بين المكونات وإدارة البيانات والأخطاء', focus: 'End-to-End Integration, Edge Cases, Persistence & Error Handling' },
+              { title: 'الاختبارات الشاملة وقياس الأداء وتحسين نقاط الضعف', focus: 'Automated Test Suite, Load/Performance Benchmarks & Bottleneck Fixes' },
+              { title: 'التوثيق الهندسي الكامل ومعمارية القرارات', focus: 'Architecture Documentation, Setup Guide, API/Usage Docs & Limitations' },
+              { title: 'العرض النهائي ومراجعة المشروع وتسليمه', focus: 'Final Demo, Engineering Retrospective, Future Work & Capstone Release' }
+            ]
+          }
+        ]
+      }
+    ];
+
+    /**
+     * Flatten all 208 lessons with rich metadata for fast lookup & navigation
+     */
+    const ALL_LESSONS = [];
+    CURRICULUM_STAGES.forEach((stage, stageIdx) => {
+      stage.courses.forEach((course) => {
+        course.lessons.forEach((lessonObj, idxInCourse) => {
+          const lessonNum = String(idxInCourse + 1).padStart(2, '0');
+          const id = `${course.code}-${lessonNum}`;
+          ALL_LESSONS.push({
+            globalIndex: ALL_LESSONS.length,
+            id,
+            stageId: stage.id,
+            stageTitle: stage.title,
+            stageNumber: stageIdx + 1,
+            courseCode: course.code,
+            courseName: course.name,
+            coursePrereqs: course.prereqs,
+            title: lessonObj.title,
+            focus: lessonObj.focus
+          });
+        });
+      });
+    });
+
+    /**
+     * Application State
+     */
+    const state = {
+      apiKey: localStorage.getItem(STORAGE_KEYS.API_KEY) || '',
+      completedIds: new Set(JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPLETED) || '[]')),
+      lessonsCache: JSON.parse(localStorage.getItem(STORAGE_KEYS.LESSONS_CACHE) || '{}'),
+      activeLessonId: localStorage.getItem(STORAGE_KEYS.ACTIVE_LESSON) || 'HW101-01',
+      searchQuery: '',
+      isGenerating: false,
+      isAddonLoading: false,
+      expandedCourses: new Set(['HW101']),
+      expandedStages: new Set(['stage-1'])
+    };
+
+    if (!ALL_LESSONS.some((l) => l.id === state.activeLessonId)) {
+      state.activeLessonId = 'HW101-01';
+    }
+
+    /**
+     * DOM References
+     */
+    const dom = {
+      toastContainer: document.getElementById('toastContainer'),
+      settingsModal: document.getElementById('settingsModal'),
+      openSettingsBtn: document.getElementById('openSettingsBtn'),
+      bannerOpenSettingsBtn: document.getElementById('bannerOpenSettingsBtn'),
+      closeSettingsBtn: document.getElementById('closeSettingsBtn'),
+      cancelSettingsBtn: document.getElementById('cancelSettingsBtn'),
+      saveSettingsBtn: document.getElementById('saveSettingsBtn'),
+      apiKeyInput: document.getElementById('apiKeyInput'),
+      toggleApiKeyVisBtn: document.getElementById('toggleApiKeyVisBtn'),
+      apiStatusDot: document.getElementById('apiStatusDot'),
+      missingApiBanner: document.getElementById('missingApiBanner'),
+      storageStatsLabel: document.getElementById('storageStatsLabel'),
+      exportDataBtn: document.getElementById('exportDataBtn'),
+      clearCacheBtn: document.getElementById('clearCacheBtn'),
+      resetAllBtn: document.getElementById('resetAllBtn'),
+      confirmResetBar: document.getElementById('confirmResetBar'),
+      confirmResetYes: document.getElementById('confirmResetYes'),
+      confirmResetNo: document.getElementById('confirmResetNo'),
+      themeToggleBtn: document.getElementById('themeToggleBtn'),
+      themeIcon: document.getElementById('themeIcon'),
+      mobileSidebarBtn: document.getElementById('mobileSidebarBtn'),
+      curriculumSidebar: document.getElementById('curriculumSidebar'),
+      sidebarBackdrop: document.getElementById('sidebarBackdrop'),
+      lessonSearchInput: document.getElementById('lessonSearchInput'),
+      clearSearchBtn: document.getElementById('clearSearchBtn'),
+      curriculumTreeContainer: document.getElementById('curriculumTreeContainer'),
+      headerProgressText: document.getElementById('headerProgressText'),
+      headerProgressBar: document.getElementById('headerProgressBar'),
+      sidebarCompletedBadge: document.getElementById('sidebarCompletedBadge'),
+      sidebarProgressBar: document.getElementById('sidebarProgressBar'),
+      lessonIdBadge: document.getElementById('lessonIdBadge'),
+      stageBadge: document.getElementById('stageBadge'),
+      courseBadge: document.getElementById('courseBadge'),
+      cachedBadge: document.getElementById('cachedBadge'),
+      lessonCompletedCheckbox: document.getElementById('lessonCompletedCheckbox'),
+      lessonCompletedLabel: document.getElementById('lessonCompletedLabel'),
+      lessonTitleHeading: document.getElementById('lessonTitleHeading'),
+      lessonFocusSubtitle: document.getElementById('lessonFocusSubtitle'),
+      prereqsList: document.getElementById('prereqsList'),
+      generateLessonBtn: document.getElementById('generateLessonBtn'),
+      generateLessonBtnText: document.getElementById('generateLessonBtnText'),
+      simplerExampleBtn: document.getElementById('simplerExampleBtn'),
+      extraQuizBtn: document.getElementById('extraQuizBtn'),
+      loadingState: document.getElementById('loadingState'),
+      loadingTitle: document.getElementById('loadingTitle'),
+      loadingSubtitle: document.getElementById('loadingSubtitle'),
+      emptyLessonState: document.getElementById('emptyLessonState'),
+      renderedLessonContent: document.getElementById('renderedLessonContent'),
+      keyTermsGrid: document.getElementById('keyTermsGrid'),
+      objectivesBox: document.getElementById('objectivesBox'),
+      deepExplanationBox: document.getElementById('deepExplanationBox'),
+      examplesContainer: document.getElementById('examplesContainer'),
+      mainQuizSection: document.getElementById('mainQuizSection'),
+      mainQuizScoreBadge: document.getElementById('mainQuizScoreBadge'),
+      mainQuizContainer: document.getElementById('mainQuizContainer'),
+      dynamicAddonPanel: document.getElementById('dynamicAddonPanel'),
+      addonIcon: document.getElementById('addonIcon'),
+      addonTitle: document.getElementById('addonTitle'),
+      closeAddonBtn: document.getElementById('closeAddonBtn'),
+      addonLoading: document.getElementById('addonLoading'),
+      addonBody: document.getElementById('addonBody'),
+      prevLessonBtn: document.getElementById('prevLessonBtn'),
+      nextLessonBtn: document.getElementById('nextLessonBtn'),
+      currentLessonIndexIndicator: document.getElementById('currentLessonIndexIndicator')
+    };
+
+    /**
+     * Show non-blocking notification toast
+     */
+    function showToast(message, type = 'info') {
+      const palette = {
+        info: 'bg-slate-900 text-white border-slate-700 dark:bg-slate-800',
+        success: 'bg-emerald-600 text-white border-emerald-500',
+        warning: 'bg-amber-600 text-white border-amber-500',
+        error: 'bg-rose-600 text-white border-rose-500'
+      };
+      const el = document.createElement('div');
+      el.className = `pointer-events-auto rounded-xl border px-4 py-3 text-xs sm:text-sm font-bold shadow-xl transition-all duration-300 ${palette[type] || palette.info}`;
+      el.textContent = message;
+      dom.toastContainer.appendChild(el);
+
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(8px)';
+        setTimeout(() => el.remove(), 300);
+      }, 3400);
+    }
+
+    /**
+     * Theme initialization & toggle
+     */
+    function initTheme() {
+      const saved = localStorage.getItem(STORAGE_KEYS.THEME);
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = saved ? saved === 'dark' : prefersDark;
+      document.documentElement.classList.toggle('dark', isDark);
+      dom.themeIcon.textContent = isDark ? '☀️' : '🌙';
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem(STORAGE_KEYS.THEME, isDark ? 'dark' : 'light');
+      dom.themeIcon.textContent = isDark ? '☀️' : '🌙';
+    }
+
+    /**
+     * Persist state slices to localStorage
+     */
+    function saveCompletedLessons() {
+      localStorage.setItem(STORAGE_KEYS.COMPLETED, JSON.stringify([...state.completedIds]));
+    }
+
+    function saveLessonsCache() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.LESSONS_CACHE, JSON.stringify(state.lessonsCache));
+      } catch (err) {
+        showToast('تنبيه: مساحة localStorage ممتلئة جزئياً، يُنصح بتصدير نسخة JSON.', 'warning');
+      }
+      updateStorageStats();
+    }
+
+    function updateStorageStats() {
+      const count = Object.keys(state.lessonsCache).length;
+      dom.storageStatsLabel.textContent = `${count} / 208 Cached Lessons`;
+    }
+
+    function updateApiStatusUI() {
+      const hasKey = Boolean(state.apiKey && state.apiKey.trim().length > 0);
+      dom.apiStatusDot.className = hasKey
+        ? 'h-2 w-2 rounded-full bg-emerald-400'
+        : 'h-2 w-2 rounded-full bg-amber-400';
+      dom.missingApiBanner.classList.toggle('hidden', hasKey);
+    }
+
+    /**
+     * Update global progress bars & counters across header and sidebar
+     */
+    function updateProgressUI() {
+      const total = ALL_LESSONS.length; // 208
+      const done = state.completedIds.size;
+      const pct = total > 0 ? ((done / total) * 100).toFixed(1) : '0.0';
+
+      dom.headerProgressText.textContent = `${done} / ${total} (${pct}%)`;
+      dom.headerProgressBar.style.width = `${pct}%`;
+
+      dom.sidebarCompletedBadge.textContent = `${done} / ${total} (${pct}%)`;
+      dom.sidebarProgressBar.style.width = `${pct}%`;
+    }
+
+    /**
+     * Render the 6 Stages -> 26 Courses -> 208 Lessons Sidebar Tree
+     */
+    function renderSidebarTree() {
+      const query = state.searchQuery.trim().toLowerCase();
+      dom.clearSearchBtn.classList.toggle('hidden', query.length === 0);
+      dom.curriculumTreeContainer.innerHTML = '';
+
+      let anyMatch = false;
+
+      CURRICULUM_STAGES.forEach((stage) => {
+        const stageCoursesHtml = [];
+        let stageHasMatch = false;
+
+        stage.courses.forEach((course) => {
+          const courseLessons = [];
+          let courseDoneCount = 0;
+
+          course.lessons.forEach((lessonObj, idx) => {
+            const lessonId = `${course.code}-${String(idx + 1).padStart(2, '0')}`;
+            const isDone = state.completedIds.has(lessonId);
+            if (isDone) courseDoneCount++;
+
+            const isCached = Boolean(state.lessonsCache[lessonId]);
+            const matchesSearch =
+              !query ||
+              lessonId.toLowerCase().includes(query) ||
+              course.code.toLowerCase().includes(query) ||
+              course.name.toLowerCase().includes(query) ||
+              lessonObj.title.toLowerCase().includes(query) ||
+              lessonObj.focus.toLowerCase().includes(query);
+
+            if (matchesSearch) {
+              courseLessons.push({
+                id: lessonId,
+                title: lessonObj.title,
+                focus: lessonObj.focus,
+                isDone,
+                isCached
+              });
+            }
+          });
+
+          if (courseLessons.length > 0) {
+            stageHasMatch = true;
+            anyMatch = true;
+
+            const isCourseExpanded = query.length > 0 || state.expandedCourses.has(course.code);
+            const lessonsListHtml = courseLessons
+              .map((l) => {
+                const isActive = l.id === state.activeLessonId;
+                return `
+                  <button
+                    type="button"
+                    data-lesson-id="${l.id}"
+                    class="lesson-nav-btn w-full text-right rounded-xl px-2.5 py-2 text-xs flex items-start gap-2 transition ${
+                      isActive
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300'
+                    }"
+                  >
+                    <span class="mt-0.5 shrink-0 font-bold ${
+                      isActive
+                        ? 'text-white'
+                        : l.isDone
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-slate-400'
+                    }">${l.isDone ? '✓' : '○'}</span>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center justify-between gap-1">
+                        <span class="ltr-block font-bold text-[11px] ${
+                          isActive ? 'text-indigo-100' : 'text-indigo-600 dark:text-indigo-400'
+                        }">${l.id}</span>
+                        ${
+                          l.isCached
+                            ? `<span class="text-[10px] px-1.5 py-0.2 rounded ${
+                                isActive
+                                  ? 'bg-white/20 text-white'
+                                  : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                              }">محفوظ</span>`
+                            : ''
+                        }
+                      </div>
+                      <div class="font-semibold leading-snug mt-0.5 line-clamp-2">${escapeHtml(l.title)}</div>
+                    </div>
+                  </button>
+                `;
+              })
+              .join('');
+
+            stageCoursesHtml.push(`
+              <div class="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 overflow-hidden">
+                <button
+                  type="button"
+                  data-course-code="${course.code}"
+                  class="course-toggle-btn w-full px-3 py-2.5 flex items-center justify-between gap-2 text-right hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
+                >
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                      <span class="ltr-block text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400">${course.code}</span>
+                      <span class="text-[11px] text-slate-400 ltr-block">(${courseDoneCount}/8)</span>
+                    </div>
+                    <div class="text-xs font-bold truncate mt-0.5">${escapeHtml(course.name)}</div>
+                  </div>
+                  <span class="text-xs text-slate-400 shrink-0">${isCourseExpanded ? '▾' : '◂'}</span>
+                </button>
+                <div class="${isCourseExpanded ? 'block' : 'hidden'} p-1.5 space-y-1 border-t border-slate-200/70 dark:border-slate-800/70 bg-white dark:bg-slate-900">
+                  ${lessonsListHtml}
+                </div>
+              </div>
+            `);
+          }
+        });
+
+        if (stageHasMatch) {
+          const isStageExpanded = query.length > 0 || state.expandedStages.has(stage.id);
+          const stageCard = document.createElement('div');
+          stageCard.className = 'rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden';
+          stageCard.innerHTML = `
+            <button
+              type="button"
+              data-stage-id="${stage.id}"
+              class="stage-toggle-btn w-full px-3.5 py-3 flex items-center justify-between gap-2 text-right bg-slate-100/80 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            >
+              <span class="text-xs font-extrabold leading-snug">${escapeHtml(stage.title)}</span>
+              <span class="text-xs text-slate-500 shrink-0">${isStageExpanded ? '−' : '+'}</span>
+            </button>
+            <div class="${isStageExpanded ? 'block' : 'hidden'} p-2 space-y-2">
+              ${stageCoursesHtml.join('')}
+            </div>
+          `;
+          dom.curriculumTreeContainer.appendChild(stageCard);
+        }
+      });
+
+      if (!anyMatch) {
+        dom.curriculumTreeContainer.innerHTML = `
+          <div class="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-6 text-center text-xs text-slate-500">
+            لا توجد دروس مطابقة لبحثك «${escapeHtml(state.searchQuery)}».
+          </div>
+        `;
+      }
+
+      // Bind stage, course, and lesson buttons
+      dom.curriculumTreeContainer.querySelectorAll('.stage-toggle-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.stageId;
+          if (state.expandedStages.has(id)) state.expandedStages.delete(id);
+          else state.expandedStages.add(id);
+          renderSidebarTree();
+        });
+      });
+
+      dom.curriculumTreeContainer.querySelectorAll('.course-toggle-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const code = btn.dataset.courseCode;
+          if (state.expandedCourses.has(code)) state.expandedCourses.delete(code);
+          else state.expandedCourses.add(code);
+          renderSidebarTree();
+        });
+      });
+
+      dom.curriculumTreeContainer.querySelectorAll('.lesson-nav-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const lessonId = btn.dataset.lessonId;
+          selectLesson(lessonId, { autoGenerateIfMissing: true });
+          closeMobileSidebar();
+        });
+      });
+    }
+
+    function openMobileSidebar() {
+      dom.curriculumSidebar.classList.remove('translate-x-full');
+      dom.sidebarBackdrop.classList.remove('hidden');
+    }
+
+    function closeMobileSidebar() {
+      dom.curriculumSidebar.classList.add('translate-x-full');
+      dom.sidebarBackdrop.classList.add('hidden');
+    }
+
+    /**
+     * Get active lesson object
+     */
+    function getActiveLesson() {
+      return ALL_LESSONS.find((l) => l.id === state.activeLessonId) || ALL_LESSONS[0];
+    }
+
+    /**
+     * Select a lesson and render header + cached content (or trigger auto-generation)
+     */
+    async function selectLesson(lessonId, options = { autoGenerateIfMissing: true }) {
+      const found = ALL_LESSONS.find((l) => l.id === lessonId);
+      if (!found) return;
+
+      state.activeLessonId = found.id;
+      localStorage.setItem(STORAGE_KEYS.ACTIVE_LESSON, found.id);
+
+      // Ensure stage & course are expanded in sidebar
+      state.expandedStages.add(found.stageId);
+      state.expandedCourses.add(found.courseCode);
+
+      // Hide addon panel when switching lessons
+      dom.dynamicAddonPanel.classList.add('hidden');
+      dom.addonBody.innerHTML = '';
+
+      renderLessonHeader(found);
+      renderSidebarTree();
+      updatePrevNextButtons(found);
+
+      const cachedData = state.lessonsCache[found.id];
+      if (cachedData) {
+        dom.cachedBadge.classList.remove('hidden');
+        dom.generateLessonBtnText.textContent = 'إعادة توليد الدرس';
+        hideAllLessonStates();
+        dom.renderedLessonContent.classList.remove('hidden');
+        renderStructuredLesson(cachedData);
+      } else {
+        dom.cachedBadge.classList.add('hidden');
+        dom.generateLessonBtnText.textContent = 'توليد الدرس الآن';
+
+        if (options.autoGenerateIfMissing && state.apiKey.trim()) {
+          await generateAndCacheLesson(found);
+        } else {
+          hideAllLessonStates();
+          dom.emptyLessonState.classList.remove('hidden');
+        }
+      }
+    }
+
+    function hideAllLessonStates() {
+      dom.loadingState.classList.add('hidden');
+      dom.emptyLessonState.classList.add('hidden');
+      dom.renderedLessonContent.classList.add('hidden');
+    }
+
+    function renderLessonHeader(lesson) {
+      dom.lessonIdBadge.textContent = lesson.id;
+      dom.stageBadge.textContent = `المرحلة ${lesson.stageNumber}`;
+      dom.courseBadge.textContent = `${lesson.courseCode}: ${lesson.courseName}`;
+      dom.lessonTitleHeading.textContent = lesson.title;
+      dom.lessonFocusSubtitle.textContent = `المحاور الهندسية: ${lesson.focus}`;
+
+      const isDone = state.completedIds.has(lesson.id);
+      dom.lessonCompletedCheckbox.checked = isDone;
+      dom.lessonCompletedLabel.textContent = isDone ? 'مكتمل ✓' : 'تم إتمام الدرس';
+      dom.lessonCompletedLabel.className = isDone
+        ? 'text-xs font-extrabold text-emerald-600 dark:text-emerald-400'
+        : 'text-xs font-bold text-slate-700 dark:text-slate-200';
+
+      dom.prereqsList.innerHTML = lesson.coursePrereqs
+        .map(
+          (p) =>
+            `<span class="ltr-block rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 text-[11px] font-semibold">${escapeHtml(p)}</span>`
+        )
+        .join('');
+    }
+
+    function updatePrevNextButtons(lesson) {
+      dom.currentLessonIndexIndicator.textContent = `Lesson ${lesson.globalIndex + 1} / ${ALL_LESSONS.length}`;
+      dom.prevLessonBtn.disabled = lesson.globalIndex <= 0;
+      dom.nextLessonBtn.disabled = lesson.globalIndex >= ALL_LESSONS.length - 1;
+    }
+
+    /**
+     * Render structured lesson data into the DOM
+     */
+    function renderStructuredLesson(data) {
+      // 1. Key Terms
+      const terms = Array.isArray(data.keyTerms) ? data.keyTerms : [];
+      dom.keyTermsGrid.innerHTML = terms
+        .map(
+          (t) => `
+            <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/50 p-4 space-y-1.5">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-extrabold text-sm text-slate-900 dark:text-white">${escapeHtml(t.termAr || '')}</span>
+                ${
+                  t.termEn
+                    ? `<span class="ltr-block rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 text-[11px] font-semibold">${escapeHtml(t.termEn)}</span>`
+                    : ''
+                }
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">${escapeHtml(t.definitionAr || '')}</p>
+            </div>
+          `
+        )
+        .join('');
+
+      // 2. Objectives & Why It Matters
+      const objs = Array.isArray(data.objectives) ? data.objectives : [];
+      dom.objectivesBox.innerHTML = `
+        <ul class="list-disc pr-5 space-y-1.5 text-slate-700 dark:text-slate-200">
+          ${objs.map((o) => `<li>${escapeHtml(o)}</li>`).join('')}
+        </ul>
+        ${
+          data.whyItMatters
+            ? `<div class="pt-2 border-t border-emerald-500/20 text-xs sm:text-sm text-emerald-900 dark:text-emerald-200 font-semibold">
+                 <span class="font-extrabold">الأهمية الهندسية وما يفتحه لاحقاً:</span> ${escapeHtml(data.whyItMatters)}
+               </div>`
+            : ''
+        }
+      `;
+
+      // 3. Deep Explanation Paragraphs
+      const paras = Array.isArray(data.deepExplanationParagraphs) ? data.deepExplanationParagraphs : [];
+      dom.deepExplanationBox.innerHTML = paras
+        .map(
+          (p) => `<p class="text-slate-700 dark:text-slate-200 whitespace-pre-line">${formatInlineCode(p)}</p>`
+        )
+        .join('');
+
+      // 4. Code & Hardware/Memory Examples (Strictly LTR)
+      const examples = Array.isArray(data.examples) ? data.examples : [];
+      dom.examplesContainer.innerHTML = examples
+        .map((ex, idx) => {
+          const codeStr = ex.code || '';
+          return `
+            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-950 text-slate-100 overflow-hidden shadow-xs">
+              <div class="px-4 py-2.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="ltr-block rounded bg-cyan-500/20 text-cyan-300 px-2 py-0.5 text-[11px] font-bold">${escapeHtml(ex.language || 'code')}</span>
+                  <span class="text-xs font-bold text-slate-200 truncate">${escapeHtml(ex.title || `مثال ${idx + 1}`)}</span>
+                </div>
+                <button
+                  type="button"
+                  data-copy-target="codeSnippet_${idx}"
+                  class="copy-code-btn rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 text-[11px] font-semibold transition shrink-0"
+                >
+                  نسخ الكود
+                </button>
+              </div>
+              <pre id="codeSnippet_${idx}" class="code-box p-4 text-xs sm:text-[13px] leading-relaxed text-emerald-300">${escapeHtml(codeStr)}</pre>
+              ${
+                ex.explanationAr
+                  ? `<div class="px-4 py-3 bg-slate-900/70 border-t border-slate-800 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                       <span class="font-bold text-cyan-300 ml-1">توضيح التنفيذ:</span>
+                       ${formatInlineCode(ex.explanationAr)}
+                     </div>`
+                  : ''
+              }
+            </div>
+          `;
+        })
+        .join('');
+
+      // Attach clipboard copy handlers
+      dom.examplesContainer.querySelectorAll('.copy-code-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.dataset.copyTarget;
+          const preEl = document.getElementById(targetId);
+          if (!preEl) return;
+          copyTextFallback(preEl.textContent || '');
+          showToast('تم نسخ الكود إلى الحافظة.', 'success');
+        });
+      });
+
+      // 5. Main Interactive Quiz
+      renderInteractiveQuiz(data.quiz || [], dom.mainQuizContainer, dom.mainQuizScoreBadge);
+    }
+
+    /**
+     * Render interactive multiple-choice quiz questions with instant feedback
+     */
+    function renderInteractiveQuiz(questions, containerEl, badgeEl) {
+      if (!Array.isArray(questions) || questions.length === 0) {
+        containerEl.innerHTML = `<p class="text-xs text-slate-500">لا توجد أسئلة متاحة حالياً.</p>`;
+        badgeEl.classList.add('hidden');
+        return;
+      }
+
+      const total = questions.length;
+      const answeredMap = new Map();
+      let correctCount = 0;
+
+      badgeEl.classList.remove('hidden');
+      badgeEl.textContent = `Score: 0 / ${total}`;
+
+      containerEl.innerHTML = questions
+        .map((q, qIdx) => {
+          const options = Array.isArray(q.options) ? q.options : [];
+          return `
+            <div class="quiz-card rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 p-4 sm:p-5 space-y-3" data-q-index="${qIdx}">
+              <div class="font-bold text-sm sm:text-[15px] leading-relaxed text-slate-900 dark:text-white">
+                <span class="text-indigo-600 dark:text-indigo-400 font-extrabold ml-1.5">س${qIdx + 1}:</span>
+                ${formatInlineCode(q.questionAr || '')}
+              </div>
+              <div class="space-y-2">
+                ${options
+                  .map(
+                    (opt, oIdx) => `
+                      <button
+                        type="button"
+                        data-q-index="${qIdx}"
+                        data-o-index="${oIdx}"
+                        class="quiz-option-btn w-full text-right rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-indigo-500/60 px-4 py-2.5 text-xs sm:text-sm font-semibold transition flex items-center justify-between gap-2"
+                      >
+                        <span>${formatInlineCode(opt)}</span>
+                        <span class="option-mark text-xs font-extrabold"></span>
+                      </button>
+                    `
+                  )
+                  .join('')}
+              </div>
+              <div class="quiz-feedback hidden rounded-xl p-3 text-xs sm:text-sm leading-relaxed"></div>
+            </div>
+          `;
+        })
+        .join('');
+
+      containerEl.querySelectorAll('.quiz-option-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const qIdx = Number(btn.dataset.qIndex);
+          const oIdx = Number(btn.dataset.oIndex);
+          const qData = questions[qIdx];
+          if (!qData) return;
+
+          const card = containerEl.querySelector(`.quiz-card[data-q-index="${qIdx}"]`);
+          const allBtns = card.querySelectorAll('.quiz-option-btn');
+          const feedbackEl = card.querySelector('.quiz-feedback');
+          const correctIndex = Number(qData.correctIndex ?? 0);
+          const isRight = oIdx === correctIndex;
+
+          // Update score if not previously answered or if changed
+          const prevAnswer = answeredMap.get(qIdx);
+          if (prevAnswer === undefined) {
+            if (isRight) correctCount++;
+          } else {
+            if (prevAnswer && !isRight) correctCount--;
+            if (!prevAnswer && isRight) correctCount++;
+          }
+          answeredMap.set(qIdx, isRight);
+
+          allBtns.forEach((b, idx) => {
+            b.classList.remove(
+              'border-emerald-500',
+              'bg-emerald-500/10',
+              'text-emerald-800',
+              'dark:text-emerald-200',
+              'border-rose-500',
+              'bg-rose-500/10',
+              'text-rose-800',
+              'dark:text-rose-200'
+            );
+            const mark = b.querySelector('.option-mark');
+            mark.textContent = '';
+
+            if (idx === correctIndex) {
+              b.classList.add('border-emerald-500', 'bg-emerald-500/10', 'text-emerald-800', 'dark:text-emerald-200');
+              mark.textContent = '✓ صحيح';
+            } else if (idx === oIdx && !isRight) {
+              b.classList.add('border-rose-500', 'bg-rose-500/10', 'text-rose-800', 'dark:text-rose-200');
+              mark.textContent = '✕';
+            }
+          });
+
+          feedbackEl.classList.remove('hidden', 'bg-emerald-500/10', 'text-emerald-800', 'dark:text-emerald-200', 'bg-rose-500/10', 'text-rose-800', 'dark:text-rose-200');
+          if (isRight) {
+            feedbackEl.classList.add('bg-emerald-500/10', 'text-emerald-800', 'dark:text-emerald-200');
+            feedbackEl.innerHTML = `<strong>إجابة صحيحة!</strong> ${formatInlineCode(qData.explanationAr || '')}`;
+          } else {
+            feedbackEl.classList.add('bg-rose-500/10', 'text-rose-800', 'dark:text-rose-200');
+            feedbackEl.innerHTML = `<strong>إجابة غير دقيقة.</strong> ${formatInlineCode(qData.explanationAr || '')}`;
+          }
+
+          badgeEl.textContent = `Score: ${correctCount} / ${total}`;
+        });
+      });
+    }
+
+    /**
+     * Format inline backticked technical terms/code into LTR spans
+     */
+    function formatInlineCode(text) {
+      const escaped = escapeHtml(String(text || ''));
+      return escaped.replace(/`([^`]+)`/g, (_, codePart) => {
+        return `<code class="ltr-block inline-block rounded bg-slate-200/80 dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.2 text-[12px] font-semibold">${codePart}</code>`;
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function copyTextFallback(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+      } catch (e) {
+        // Ignore if blocked
+      }
+      document.body.removeChild(ta);
+    }
+
+    /**
+     * Call Gemini API with exponential backoff retry
+     */
+    async function callGeminiAPI(payload, maxRetries = 4) {
+      const key = (state.apiKey || '').trim();
+      if (!key) {
+        throw new Error('MISSING_API_KEY');
+      }
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(key)}`;
+      let delayMs = 1000;
+
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            const shouldRetry = response.status === 429 || response.status >= 500;
+            if (shouldRetry && attempt < maxRetries) {
+              await sleep(delayMs);
+              delayMs *= 2;
+              continue;
+            }
+            const errBody = await response.text().catch(() => '');
+            throw new Error(`HTTP ${response.status}: ${errBody.slice(0, 180)}`);
+          }
+
+          const result = await response.json();
+          const textPart = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!textPart) {
+            throw new Error('EMPTY_MODEL_RESPONSE');
+          }
+          return textPart;
+        } catch (err) {
+          if (err.message === 'MISSING_API_KEY') throw err;
+          if (attempt < maxRetries) {
+            await sleep(delayMs);
+            delayMs *= 2;
+          } else {
+            throw err;
+          }
+        }
+      }
+    }
+
+    function sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    /**
+     * Build Zero-Gap system instruction for lessons
+     */
+    function buildZeroGapSystemInstruction(lesson) {
+      return `
+أنت أستاذ جامعي ومحاضر تقني صارم في علوم الحاسب ضمن منهج "Zero-Gap CS Bachelor's Curriculum" (26 كورس، 208 درس).
+التزم بالقواعد التالية بدقة مطلقة:
+1. Zero-Gap Dependency Rule: لا تستخدم أو تفترض أي مصطلح متقدم لم يُشرح بعد في ترتيب المنهج؛ عرّف كل مصطلح جديد من الصفر بوضوح. الدرس الحالي هو (${lesson.id}: ${lesson.title}) ضمن الكورس (${lesson.courseCode}: ${lesson.courseName}) ومتطلباته السابقة هي (${lesson.coursePrereqs.join(', ')}).
+2. اللغة: جميع الشروحات والأسئلة والتعريفات باللغة العربية المصرية الواضحة والعميقة والمنهجية (مصري عميق هندسي بدون سطحية).
+3. الأكواد والمصطلحات التقنية الإنجليزية: أي كود أو أوامر أو مخرجات أو أسماء متغيرات أو مصطلحات إنجليزية يجب أن تكون بالإنجليزية وبوضوح داخل حقول الكود أو بين علامتي backtick \`like_this\`.
+4. التسلسل: ابدأ بالمصطلحات الأساسية، ثم الهدف وأهميته، ثم الشرح العميق الكامل خطوة بخطوة، ثم الأمثلة العملية، ثم كويز تفاعلي.
+أعد المخرجات بصيغة JSON مطابقة تماماً للمخطط المطلوب بدون أي نصوص خارج JSON.
+      `.trim();
+    }
+
+    /**
+     * Generate and cache full lesson in localStorage
+     */
+    async function generateAndCacheLesson(lesson) {
+      if (!state.apiKey.trim()) {
+        dom.openSettingsBtn.click();
+        showToast('من فضلك أدخل مفتاح Gemini API أولاً لتوليد الدروس.', 'warning');
+        return;
+      }
+      if (state.isGenerating) return;
+
+      state.isGenerating = true;
+      dom.generateLessonBtn.disabled = true;
+      hideAllLessonStates();
+      dom.loadingState.classList.remove('hidden');
+      dom.loadingTitle.textContent = `جاري توليد الدرس ${lesson.id}: ${lesson.title}...`;
+      dom.loadingSubtitle.textContent = 'يتم تطبيق قواعد Zero-Gap وبناء المصطلحات والشرح العميق والأمثلة والكويز التفاعلي.';
+
+      const userPrompt = `
+اشرح الدرس التالي بالتفصيل العميق الكامل وفق منهج Zero-Gap:
+- معرف الدرس: ${lesson.id}
+- المرحلة: ${lesson.stageTitle}
+- الكورس: ${lesson.courseCode} - ${lesson.courseName}
+- عنوان الدرس: ${lesson.title}
+- المحاور والمفاهيم المطلوبة: ${lesson.focus}
+- المتطلبات السابقة: ${lesson.coursePrereqs.join(', ')}
+
+قدم شرحاً عميقاً ومتدرجاً خطوة بخطوة في الهاردوير/الذاكرة/الرياضيات/البرمجة بحسب طبيعة الدرس، مع أمثلة كود أو تتبع واضحة وكويز من 4 أسئلة اختيار من متعدد.
+      `.trim();
+
+      const payload = {
+        systemInstruction: {
+          parts: [{ text: buildZeroGapSystemInstruction(lesson) }]
+        },
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: userPrompt }]
+          }
+        ],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'OBJECT',
+            properties: {
+              keyTerms: {
+                type: 'ARRAY',
+                items: {
+                  type: 'OBJECT',
+                  properties: {
+                    termAr: { type: 'STRING' },
+                    termEn: { type: 'STRING' },
+                    definitionAr: { type: 'STRING' }
+                  },
+                  required: ['termAr', 'termEn', 'definitionAr']
+                }
+              },
+              objectives: {
+                type: 'ARRAY',
+                items: { type: 'STRING' }
+              },
+              whyItMatters: { type: 'STRING' },
+              deepExplanationParagraphs: {
+                type: 'ARRAY',
+                items: { type: 'STRING' }
+              },
+              examples: {
+                type: 'ARRAY',
+                items: {
+                  type: 'OBJECT',
+                  properties: {
+                    title: { type: 'STRING' },
+                    language: { type: 'STRING' },
+                    code: { type: 'STRING' },
+                    explanationAr: { type: 'STRING' }
+                  },
+                  required: ['title', 'language', 'code', 'explanationAr']
+                }
+              },
+              quiz: {
+                type: 'ARRAY',
+                items: {
+                  type: 'OBJECT',
+                  properties: {
+                    questionAr: { type: 'STRING' },
+                    options: {
+                      type: 'ARRAY',
+                      items: { type: 'STRING' }
+                    },
+                    correctIndex: { type: 'INTEGER' },
+                    explanationAr: { type: 'STRING' }
+                  },
+                  required: ['questionAr', 'options', 'correctIndex', 'explanationAr']
+                }
+              }
+            },
+            required: ['keyTerms', 'objectives', 'whyItMatters', 'deepExplanationParagraphs', 'examples', 'quiz']
+          }
+        }
+      };
+
+      try {
+        const rawJsonText = await callGeminiAPI(payload);
+        const parsed = JSON.parse(rawJsonText);
+
+        state.lessonsCache[lesson.id] = parsed;
+        saveLessonsCache();
+        renderSidebarTree();
+
+        if (state.activeLessonId === lesson.id) {
+          dom.cachedBadge.classList.remove('hidden');
+          dom.generateLessonBtnText.textContent = 'إعادة توليد الدرس';
+          hideAllLessonStates();
+          dom.renderedLessonContent.classList.remove('hidden');
+          renderStructuredLesson(parsed);
+        }
+
+        showToast(`تم توليد وحفظ الدرس ${lesson.id} بنجاح!`, 'success');
+      } catch (err) {
+        if (state.activeLessonId === lesson.id) {
+          hideAllLessonStates();
+          if (state.lessonsCache[lesson.id]) {
+            dom.renderedLessonContent.classList.remove('hidden');
+            renderStructuredLesson(state.lessonsCache[lesson.id]);
+          } else {
+            dom.emptyLessonState.classList.remove('hidden');
+          }
+        }
+
+        if (err.message === 'MISSING_API_KEY') {
+          showToast('مفتاح Gemini API غير موجود. أضفه من الإعدادات.', 'warning');
+        } else {
+          showToast(`تعذر توليد الدرس حالياً: ${err.message}`, 'error');
+        }
+      } finally {
+        state.isGenerating = false;
+        dom.generateLessonBtn.disabled = false;
+      }
+    }
+
+    /**
+     * Handle in-page Addon actions:
+     * - 'simpler': اشرحلي بمثال أبسط
+     * - 'extra_quiz': اعملي اختبار إضافي
+     */
+    async function runLessonAddon(mode) {
+      const lesson = getActiveLesson();
+      if (!state.apiKey.trim()) {
+        dom.openSettingsBtn.click();
+        showToast('من فضلك أدخل مفتاح Gemini API أولاً.', 'warning');
+        return;
+      }
+      if (state.isAddonLoading) return;
+
+      state.isAddonLoading = true;
+      dom.simplerExampleBtn.disabled = true;
+      dom.extraQuizBtn.disabled = true;
+
+      const isSimpler = mode === 'simpler';
+      dom.dynamicAddonPanel.classList.remove('hidden');
+      dom.addonIcon.textContent = isSimpler ? '💡' : '📝';
+      dom.addonTitle.textContent = isSimpler
+        ? `شرح بمثال أبسط من الحياة اليومية — ${lesson.id}`
+        : `اختبار إضافي متقدم للتحقق من الإتقان — ${lesson.id}`;
+      dom.addonLoading.classList.remove('hidden');
+      dom.addonBody.innerHTML = '';
+      dom.dynamicAddonPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      const existingLessonContext = state.lessonsCache[lesson.id]
+        ? JSON.stringify(state.lessonsCache[lesson.id]).slice(0, 2500)
+        : lesson.focus;
+
+      if (isSimpler) {
+        const payload = {
+          systemInstruction: {
+            parts: [{ text: buildZeroGapSystemInstruction(lesson) }]
+          },
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  text: `
+بالنسبة للدرس (${lesson.id}: ${lesson.title} — ${lesson.focus}):
+اشرحلي الفكرة الأساسية بمثال أبسط جداً وقريب من الواقع اليومي بالمصري، ثم وضح كيف ينطبق هذا التشبيه تقنياً مع مثال كود قصير ومباشر بالإنجليزية.
+سياق الدرس: ${existingLessonContext}
+                  `.trim()
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: 'OBJECT',
+              properties: {
+                analogyTitleAr: { type: 'STRING' },
+                simpleStoryAr: { type: 'STRING' },
+                technicalBridgeAr: { type: 'STRING' },
+                miniCode: { type: 'STRING' },
+                miniCodeExplanationAr: { type: 'STRING' }
+              },
+              required: ['analogyTitleAr', 'simpleStoryAr', 'technicalBridgeAr', 'miniCode', 'miniCodeExplanationAr']
+            }
+          }
+        };
+
+        try {
+          const raw = await callGeminiAPI(payload);
+          const data = JSON.parse(raw);
+          dom.addonLoading.classList.add('hidden');
+          dom.addonBody.innerHTML = `
+            <div class="space-y-4">
+              <h4 class="font-extrabold text-base text-slate-900 dark:text-white">${escapeHtml(data.analogyTitleAr || 'مثال مبسط')}</h4>
+              <p class="whitespace-pre-line text-slate-700 dark:text-slate-200">${formatInlineCode(data.simpleStoryAr || '')}</p>
+              <div class="rounded-xl bg-white dark:bg-slate-900 border border-indigo-500/20 p-4">
+                <div class="font-extrabold text-xs text-indigo-600 dark:text-indigo-400 mb-1">الربط التقني الدقيق (Zero-Gap):</div>
+                <p class="whitespace-pre-line text-slate-700 dark:text-slate-200">${formatInlineCode(data.technicalBridgeAr || '')}</p>
+              </div>
+              <div class="rounded-xl bg-slate-950 text-emerald-300 overflow-hidden border border-slate-800">
+                <div class="px-3.5 py-2 bg-slate-900 text-[11px] font-bold text-slate-300 ltr-block">Simple Example Code</div>
+                <pre class="code-box p-4 text-xs sm:text-[13px]">${escapeHtml(data.miniCode || '')}</pre>
+                <div class="px-3.5 py-2.5 bg-slate-900/70 border-t border-slate-800 text-xs text-slate-300">
+                  ${formatInlineCode(data.miniCodeExplanationAr || '')}
+                </div>
+              </div>
+            </div>
+          `;
+        } catch (err) {
+          dom.addonLoading.classList.add('hidden');
+          dom.addonBody.innerHTML = `<p class="text-rose-600 dark:text-rose-400 font-bold">حدث خطأ أثناء تجهيز المثال المبسط: ${escapeHtml(err.message)}</p>`;
+        }
+      } else {
+        const payload = {
+          systemInstruction: {
+            parts: [{ text: buildZeroGapSystemInstruction(lesson) }]
+          },
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  text: `
+أنشئ اختباراً إضافياً جديداً ومختلفاً مكوناً من 3 أسئلة اختيار من متعدد عميقة حول الدرس (${lesson.id}: ${lesson.title} — ${lesson.focus}) للتحقق من الفهم الهندسي الدقيق.
+سياق الدرس: ${existingLessonContext}
+                  `.trim()
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: 'OBJECT',
+              properties: {
+                questions: {
+                  type: 'ARRAY',
+                  items: {
+                    type: 'OBJECT',
+                    properties: {
+                      questionAr: { type: 'STRING' },
+                      options: {
+                        type: 'ARRAY',
+                        items: { type: 'STRING' }
+                      },
+                      correctIndex: { type: 'INTEGER' },
+                      explanationAr: { type: 'STRING' }
+                    },
+                    required: ['questionAr', 'options', 'correctIndex', 'explanationAr']
+                  }
+                }
+              },
+              required: ['questions']
+            }
+          }
+        };
+
+        try {
+          const raw = await callGeminiAPI(payload);
+          const data = JSON.parse(raw);
+          dom.addonLoading.classList.add('hidden');
+          const quizWrapper = document.createElement('div');
+          const scoreBadge = document.createElement('span');
+          scoreBadge.className = 'inline-block rounded-full bg-violet-600/10 text-violet-700 dark:text-violet-300 px-3 py-1 text-xs font-extrabold ltr-block mb-2';
+          dom.addonBody.appendChild(scoreBadge);
+          dom.addonBody.appendChild(quizWrapper);
+          renderInteractiveQuiz(data.questions || [], quizWrapper, scoreBadge);
+        } catch (err) {
+          dom.addonLoading.classList.add('hidden');
+          dom.addonBody.innerHTML = `<p class="text-rose-600 dark:text-rose-400 font-bold">حدث خطأ أثناء إنشاء الاختبار الإضافي: ${escapeHtml(err.message)}</p>`;
+        }
+      }
+
+      state.isAddonLoading = false;
+      dom.simplerExampleBtn.disabled = false;
+      dom.extraQuizBtn.disabled = false;
+    }
+
+    /**
+     * Settings Modal & Storage Actions
+     */
+    function openSettingsModal() {
+      dom.apiKeyInput.value = state.apiKey;
+      dom.apiKeyInput.type = 'password';
+      dom.toggleApiKeyVisBtn.textContent = 'إظهار';
+      dom.confirmResetBar.classList.add('hidden');
+      updateStorageStats();
+      dom.settingsModal.classList.remove('hidden');
+      dom.settingsModal.classList.add('flex');
+    }
+
+    function closeSettingsModal() {
+      dom.settingsModal.classList.add('hidden');
+      dom.settingsModal.classList.remove('flex');
+    }
+
+    function bindEvents() {
+      dom.themeToggleBtn.addEventListener('click', toggleTheme);
+
+      dom.mobileSidebarBtn.addEventListener('click', openMobileSidebar);
+      dom.sidebarBackdrop.addEventListener('click', closeMobileSidebar);
+
+      dom.lessonSearchInput.addEventListener('input', (e) => {
+        state.searchQuery = e.target.value || '';
+        renderSidebarTree();
+      });
+
+      dom.clearSearchBtn.addEventListener('click', () => {
+        state.searchQuery = '';
+        dom.lessonSearchInput.value = '';
+        renderSidebarTree();
+      });
+
+      dom.openSettingsBtn.addEventListener('click', openSettingsModal);
+      dom.bannerOpenSettingsBtn.addEventListener('click', openSettingsModal);
+      dom.closeSettingsBtn.addEventListener('click', closeSettingsModal);
+      dom.cancelSettingsBtn.addEventListener('click', closeSettingsModal);
+
+      dom.toggleApiKeyVisBtn.addEventListener('click', () => {
+        const isPass = dom.apiKeyInput.type === 'password';
+        dom.apiKeyInput.type = isPass ? 'text' : 'password';
+        dom.toggleApiKeyVisBtn.textContent = isPass ? 'إخفاء' : 'إظهار';
+      });
+
+      dom.saveSettingsBtn.addEventListener('click', async () => {
+        const trimmed = (dom.apiKeyInput.value || '').trim();
+        state.apiKey = trimmed;
+        localStorage.setItem(STORAGE_KEYS.API_KEY, trimmed);
+        updateApiStatusUI();
+        closeSettingsModal();
+        showToast('تم حفظ إعدادات Gemini API بنجاح.', 'success');
+
+        // Auto-generate current lesson if not yet cached and key is now available
+        const current = getActiveLesson();
+        if (trimmed && !state.lessonsCache[current.id]) {
+          await generateAndCacheLesson(current);
+        }
+      });
+
+      dom.exportDataBtn.addEventListener('click', () => {
+        const exportObj = {
+          exportedAt: new Date().toISOString(),
+          totalLessons: ALL_LESSONS.length,
+          completedLessons: [...state.completedIds],
+          generatedLessons: state.lessonsCache
+        };
+        const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `zero-gap-cs-progress-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast('تم تصدير نسخة JSON من تقدمك ودروسك.', 'success');
+      });
+
+      dom.clearCacheBtn.addEventListener('click', () => {
+        state.lessonsCache = {};
+        localStorage.removeItem(STORAGE_KEYS.LESSONS_CACHE);
+        updateStorageStats();
+        renderSidebarTree();
+        selectLesson(state.activeLessonId, { autoGenerateIfMissing: false });
+        showToast('تم مسح الدروس المولّدة المحفوظة محلياً.', 'info');
+      });
+
+      dom.resetAllBtn.addEventListener('click', () => {
+        dom.confirmResetBar.classList.remove('hidden');
+      });
+
+      dom.confirmResetNo.addEventListener('click', () => {
+        dom.confirmResetBar.classList.add('hidden');
+      });
+
+      dom.confirmResetYes.addEventListener('click', () => {
+        state.completedIds.clear();
+        state.lessonsCache = {};
+        saveCompletedLessons();
+        localStorage.removeItem(STORAGE_KEYS.LESSONS_CACHE);
+        updateProgressUI();
+        updateStorageStats();
+        renderSidebarTree();
+        selectLesson(state.activeLessonId, { autoGenerateIfMissing: false });
+        dom.confirmResetBar.classList.add('hidden');
+        closeSettingsModal();
+        showToast('تم تصفير التقدم والدروس المحفوظة بالكامل.', 'info');
+      });
+
+      dom.lessonCompletedCheckbox.addEventListener('change', (e) => {
+        const lesson = getActiveLesson();
+        if (e.target.checked) {
+          state.completedIds.add(lesson.id);
+          showToast(`تم تسجيل ${lesson.id} كمكتمل ✓`, 'success');
+        } else {
+          state.completedIds.delete(lesson.id);
+          showToast(`تم إلغاء إكمال ${lesson.id}`, 'info');
+        }
+        saveCompletedLessons();
+        updateProgressUI();
+        renderLessonHeader(lesson);
+        renderSidebarTree();
+      });
+
+      dom.generateLessonBtn.addEventListener('click', () => {
+        const lesson = getActiveLesson();
+        generateAndCacheLesson(lesson);
+      });
+
+      dom.simplerExampleBtn.addEventListener('click', () => runLessonAddon('simpler'));
+      dom.extraQuizBtn.addEventListener('click', () => runLessonAddon('extra_quiz'));
+
+      dom.closeAddonBtn.addEventListener('click', () => {
+        dom.dynamicAddonPanel.classList.add('hidden');
+        dom.addonBody.innerHTML = '';
+      });
+
+      dom.prevLessonBtn.addEventListener('click', () => {
+        const current = getActiveLesson();
+        if (current.globalIndex > 0) {
+          const prev = ALL_LESSONS[current.globalIndex - 1];
+          selectLesson(prev.id, { autoGenerateIfMissing: true });
+        }
+      });
+
+      dom.nextLessonBtn.addEventListener('click', () => {
+        const current = getActiveLesson();
+        if (current.globalIndex < ALL_LESSONS.length - 1) {
+          const next = ALL_LESSONS[current.globalIndex + 1];
+          selectLesson(next.id, { autoGenerateIfMissing: true });
+        }
+      });
+    }
+
+    /**
+     * Application Bootstrap
+     */
+    window.addEventListener('DOMContentLoaded', async () => {
+      initTheme();
+      bindEvents();
+      updateApiStatusUI();
+      updateProgressUI();
+      updateStorageStats();
+      renderSidebarTree();
+      await selectLesson(state.activeLessonId, { autoGenerateIfMissing: true });
+    });
+  </script>
+</body>
+</html>
